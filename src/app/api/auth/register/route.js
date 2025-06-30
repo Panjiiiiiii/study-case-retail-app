@@ -1,22 +1,16 @@
 import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { signUpSchema } from '@/lib/validator/signUp';
 import { successResponse, errorResponse, badRequestResponse } from '@/lib/response';
 
 export async function POST(request) {
   try {
-    const { name, email, password } = await request.json();
+    const { name, email, password } = signUpSchema.parse(await request.json());
 
-    // Validation
-    if (!name || !email || !password) {
-      return badRequestResponse('Semua field harus diisi');
-    }
+    const { error } = signUpSchema.safeParse({ name, email, password });
 
-    if (password.length < 6) {
-      return badRequestResponse('Password minimal 6 karakter');
-    }
-
-    if (!email.includes('@')) {
-      return badRequestResponse('Email tidak valid');
+    if (error) {
+      return badRequestResponse(error.message);
     }
 
     // Check if user already exists
