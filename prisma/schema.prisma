@@ -1,0 +1,73 @@
+// Prisma schema file
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          Int      @id @default(autoincrement())
+  name        String
+  email       String   @unique
+  password    String
+  role        Role     @default(CASHIER) // ADMIN or CASHIER
+  transactions Transaction[]
+}
+
+enum Role {
+  ADMIN
+  CASHIER
+}
+
+model Product {
+  id          Int       @id @default(autoincrement())
+  name        String
+  price       Float
+  stock       Int
+  imageUrl    String?   // URL ke Cloudinary/Drive
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  transactions TransactionItem[]
+}
+
+model Transaction {
+  id            Int                @id @default(autoincrement())
+  userId        Int
+  total         Float
+  status        TransactionStatus   @default(PENDING)
+  paymentMethod PaymentMethod       // CASH/TRANSFER/MIDTRANS/XENDIT
+  createdAt     DateTime            @default(now())
+  user          User                @relation(fields: [userId], references: [id])
+  items         TransactionItem[]
+}
+
+model TransactionItem {
+  id              Int       @id @default(autoincrement())
+  transactionId   Int
+  productId       Int
+  quantity        Int
+  priceAtPurchase Float      // Harga saat transaksi (untuk histori)
+  transaction     Transaction @relation(fields: [transactionId], references: [id])
+  product         Product    @relation(fields: [productId], references: [id])
+}
+
+enum TransactionStatus {
+  PENDING
+  SUCCESS
+  FAILED
+  CANCELLED
+  EXPIRED
+}
+
+enum PaymentMethod {
+  CASH
+  TRANSFER
+  MIDTRANS
+  XENDIT
+  QRIS
+  E_WALLET // Gopay/OVO/DANA
+}
