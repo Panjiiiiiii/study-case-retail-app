@@ -10,7 +10,7 @@ datasource db {
 }
 
 model User {
-  id          Int      @id @default(autoincrement())
+  id          String   @id @default(uuid())
   name        String
   email       String   @unique
   password    String
@@ -24,7 +24,7 @@ enum Role {
 }
 
 model Product {
-  id          Int       @id @default(autoincrement())
+  id          String    @id @default(uuid())
   name        String
   price       Float
   stock       Int
@@ -35,8 +35,8 @@ model Product {
 }
 
 model Transaction {
-  id            Int                @id @default(autoincrement())
-  userId        Int
+  id            String             @id @default(uuid())
+  userId        String
   total         Float
   status        TransactionStatus   @default(PENDING)
   paymentMethod PaymentMethod       // CASH/TRANSFER/MIDTRANS/XENDIT
@@ -46,9 +46,9 @@ model Transaction {
 }
 
 model TransactionItem {
-  id              Int       @id @default(autoincrement())
-  transactionId   Int
-  productId       Int
+  id              String       @id @default(uuid())
+  transactionId   String
+  productId       String
   quantity        Int
   priceAtPurchase Float      // Harga saat transaksi (untuk histori)
   transaction     Transaction @relation(fields: [transactionId], references: [id])
