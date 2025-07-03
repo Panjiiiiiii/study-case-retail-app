@@ -2,20 +2,14 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import { successResponse, errorResponse, notFoundResponse, badRequestResponse } from '@/lib/response';
 
-/**
- * Create a new transaction
- * @param {Object} formData - Transaction data
- * @returns {NextResponse} - Response with success status and message
- */
 export async function createTransaction(formData) {
   try {
     const { auth } = await import('@/lib/auth');
     const session = await auth();
     
     if (!session) {
-      return errorResponse('Unauthorized', 401);
+      return { success: false, message: 'Unauthorized', error: 'Unauthorized' };
     }
 
     const total = parseFloat(formData.get('total'));
@@ -24,13 +18,13 @@ export async function createTransaction(formData) {
 
     // Validate required fields
     if (!total || !paymentMethod || !items || items.length === 0) {
-      return badRequestResponse('Data transaksi tidak lengkap');
+      return { success: false, message: 'Data transaksi tidak lengkap' };
     }
 
         // Validate payment method
         const validPaymentMethods = ['CASH', 'TRANSFER', 'MIDTRANS', 'XENDIT', 'QRIS', 'E_WALLET'];
         if (!validPaymentMethods.includes(paymentMethod)) {
-            return badRequestResponse('Metode pembayaran tidak valid');
+            return { success: false, message: 'Metode pembayaran tidak valid' };
         }
 
             // Use authenticated user
@@ -43,11 +37,11 @@ export async function createTransaction(formData) {
             });
 
             if (!product) {
-                return notFoundResponse(`Produk dengan ID ${item.productId} tidak ditemukan`);
+                return { success: false, message: `Produk dengan ID ${item.productId} tidak ditemukan` };
             }
 
             if (product.stock < parseInt(item.quantity)) {
-                return badRequestResponse(`Stok produk ${product.name} tidak mencukupi`);
+                return { success: false, message: `Stok produk ${product.name} tidak mencukupi` };
             }
         }
 
@@ -93,21 +87,14 @@ export async function createTransaction(formData) {
         revalidatePath('/transactions');
         revalidatePath('/');
 
-        return successResponse({
-            message: 'Transaksi berhasil dibuat',
-            data: transaction
-        });
+        return { success: true, message: 'Transaksi berhasil dibuat', data: transaction };
 
     } catch (error) {
         console.error('Error creating transaction:', error);
-        return errorResponse('Terjadi kesalahan saat membuat transaksi', 500);
+        return { success: false, message: 'Terjadi kesalahan saat membuat transaksi', error: error.message };
     }
 }
 
-/**
- * Get all transactions with user and items details
- * @returns {NextResponse} - Response with array of transactions
- */
 export async function getAllTransactions() {
     try {
         const transactions = await prisma.transaction.findMany({
@@ -137,19 +124,14 @@ export async function getAllTransactions() {
             }
         });
 
-        return successResponse(transactions);
+        return { success: true, data: transactions, message: 'Data transaksi berhasil diambil' };
 
     } catch (error) {
         console.error('Error fetching transactions:', error);
-        return errorResponse('Terjadi kesalahan saat mengambil data transaksi', 500);
+        return { success: false, message: 'Terjadi kesalahan saat mengambil data transaksi', error: error.message };
     }
 }
 
-/**
- * Get a single transaction by ID with details
- * @param {number} id - Transaction ID
- * @returns {NextResponse} - Response with transaction data
- */
 export async function getTransactionById(id) {
     try {
         const transaction = await prisma.transaction.findUnique({
@@ -180,29 +162,22 @@ export async function getTransactionById(id) {
         });
 
         if (!transaction) {
-            return notFoundResponse('Transaksi tidak ditemukan');
+            return { success: false, message: 'Transaksi tidak ditemukan' };
         }
-
-        return successResponse(transaction);
+        return { success: true, data: transaction, message: 'Data transaksi berhasil diambil' };
 
     } catch (error) {
         console.error('Error fetching transaction:', error);
-        return errorResponse('Terjadi kesalahan saat mengambil data transaksi', 500);
+        return { success: false, message: 'Terjadi kesalahan saat mengambil data transaksi', error: error.message };
     }
 }
 
-/**
- * Update transaction status
- * @param {number} id - Transaction ID
- * @param {string} status - New status
- * @returns {NextResponse} - Response with success status and message
- */
 export async function updateTransactionStatus(id, status) {
     try {
         const validStatuses = ['PENDING', 'SUCCESS', 'FAILED', 'CANCELLED', 'EXPIRED'];
 
         if (!validStatuses.includes(status)) {
-            return badRequestResponse('Status transaksi tidak valid');
+            return { success: false, message: 'Status transaksi tidak valid' };
         }
 
         const transaction = await prisma.transaction.update({
@@ -237,27 +212,19 @@ export async function updateTransactionStatus(id, status) {
         revalidatePath('/transactions');
         revalidatePath(`/transactions/${id}`);
 
-        return successResponse({
-            message: 'Status transaksi berhasil diperbarui',
-            data: transaction
-        });
+        return { success: true, data: transaction, message: 'Status transaksi berhasil diperbarui' };
 
     } catch (error) {
         console.error('Error updating transaction status:', error);
 
         if (error.code === 'P2025') {
-            return notFoundResponse('Transaksi tidak ditemukan');
+            return { success: false, message: 'Transaksi tidak ditemukan' };
         }
 
-        return errorResponse('Terjadi kesalahan saat memperbarui status transaksi', 500);
+        return { success: false, message: 'Terjadi kesalahan saat memperbarui status transaksi', error: error.message };
     }
 }
 
-/**
- * Delete a transaction (only if status is PENDING or FAILED)
- * @param {number} id - Transaction ID
- * @returns {NextResponse} - Response with success status and message
- */
 export async function deleteTransaction(id) {
     try {
         // Check if transaction exists
@@ -271,12 +238,12 @@ export async function deleteTransaction(id) {
         });
 
         if (!existingTransaction) {
-            return notFoundResponse('Transaksi tidak ditemukan');
+            return { success: false, message: 'Transaksi tidak ditemukan' };
         }
 
         // Only allow deletion for PENDING or FAILED transactions
         if (!['PENDING', 'FAILED'].includes(existingTransaction.status)) {
-            return badRequestResponse('Transaksi yang sudah berhasil tidak dapat dihapus');
+            return { success: false, message: 'Transaksi yang sudah berhasil tidak dapat dihapus' };
         }
 
         // Delete transaction and restore product stock
@@ -311,21 +278,14 @@ export async function deleteTransaction(id) {
         revalidatePath('/transactions');
         revalidatePath('/');
 
-        return successResponse({
-            message: 'Transaksi berhasil dihapus'
-        });
+        return { success: true, message: 'Transaksi berhasil dihapus' };
 
     } catch (error) {
         console.error('Error deleting transaction:', error);
-        return errorResponse('Terjadi kesalahan saat menghapus transaksi', 500);
+        return { success: false, message: 'Terjadi kesalahan saat menghapus transaksi', error: error.message };
     }
 }
 
-/**
- * Get transactions by user ID
- * @param {number} userId - User ID
- * @returns {NextResponse} - Response with array of user transactions
- */
 export async function getTransactionsByUser(userId) {
     try {
         const transactions = await prisma.transaction.findMany({
@@ -350,25 +310,20 @@ export async function getTransactionsByUser(userId) {
             }
         });
 
-        return successResponse(transactions);
+        return { success: true, data: transactions, message: 'Data transaksi berhasil diambil' };
 
     } catch (error) {
         console.error('Error fetching user transactions:', error);
-        return errorResponse('Terjadi kesalahan saat mengambil data transaksi user', 500);
+        return { success: false, message: 'Terjadi kesalahan saat mengambil data transaksi user', error: error.message };
     }
 }
 
-/**
- * Get transactions by status
- * @param {string} status - Transaction status
- * @returns {NextResponse} - Response with array of transactions
- */
 export async function getTransactionsByStatus(status) {
     try {
         const validStatuses = ['PENDING', 'SUCCESS', 'FAILED', 'CANCELLED', 'EXPIRED'];
 
         if (!validStatuses.includes(status)) {
-            return badRequestResponse('Status transaksi tidak valid');
+            return { success: false, message: 'Status transaksi tidak valid' };
         }
 
         const transactions = await prisma.transaction.findMany({
@@ -401,18 +356,14 @@ export async function getTransactionsByStatus(status) {
             }
         });
 
-        return successResponse(transactions);
+        return { success: true, data: transactions, message: 'Data transaksi berhasil diambil' };
 
     } catch (error) {
         console.error('Error fetching transactions by status:', error);
-        return errorResponse('Terjadi kesalahan saat mengambil data transaksi', 500);
+        return { success: false, message: 'Terjadi kesalahan saat mengambil data transaksi', error: error.message };
     }
 }
 
-/**
- * Get transaction statistics
- * @returns {NextResponse} - Response with transaction statistics
- */
 export async function getTransactionStats() {
     try {
         const [
@@ -460,23 +411,18 @@ export async function getTransactionStats() {
             todayRevenue: todayRevenue._sum.total || 0
         };
 
-        return successResponse(stats);
+        return { success: true, data: stats, message: 'Data statistik transaksi berhasil diambil' };
 
     } catch (error) {
         console.error('Error fetching transaction stats:', error);
-        return errorResponse('Terjadi kesalahan saat mengambil statistik transaksi', 500);
+        return { success: false, message: 'Terjadi kesalahan saat mengambil statistik transaksi', error: error.message };
     }
 }
 
-/**
- * Search transactions by user name or transaction ID
- * @param {string} query - Search query
- * @returns {NextResponse} - Response with filtered transactions
- */
 export async function searchTransactions(query) {
     try {
         if (!query || query.trim().length === 0) {
-            return badRequestResponse('Query pencarian tidak boleh kosong');
+            return { success: false, message: 'Query pencarian tidak boleh kosong' };
         }
 
         const transactions = await prisma.transaction.findMany({
@@ -523,10 +469,10 @@ export async function searchTransactions(query) {
             }
         });
 
-        return successResponse(transactions);
+        return { success: true, data: transactions, message: 'Data transaksi berhasil diambil' };
 
     } catch (error) {
         console.error('Error searching transactions:', error);
-        return errorResponse('Terjadi kesalahan saat mencari transaksi', 500);
+        return { success: false, message: 'Terjadi kesalahan saat mencari transaksi', error: error.message };
     }
 }

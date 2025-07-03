@@ -3,13 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { createProductSchema } from '@/lib/validator/product';
-import { successResponse, errorResponse, notFoundResponse, badRequestResponse } from '@/lib/response';
 
-/**
- * Create a new product
- * @param {Object} formData - Product data
- * @returns {NextResponse} - Response with success status and message
- */
 export async function createProduct(formData) {
     try {
         const name = formData.get('name');
@@ -42,10 +36,7 @@ export async function createProduct(formData) {
         revalidatePath('/products');
         revalidatePath('/');
 
-        return successResponse({
-            message: 'Produk berhasil ditambahkan',
-            data: product
-        });
+        return { success: true, message: 'Produk berhasil ditambahkan' };
 
     } catch (error) {
         console.error('Error creating product:', error);
@@ -65,11 +56,11 @@ export async function getAllProducts() {
             }
         });
 
-        return successResponse(products);
+        return { success: true, data: products, message: 'Data produk berhasil diambil' };
 
     } catch (error) {
         console.error('Error fetching products:', error);
-        return errorResponse('Terjadi kesalahan saat mengambil data produk', 500);
+        return { success: false, message: 'Terjadi kesalahan saat mengambil data produk', error: error.message };
     }
 }
 
@@ -87,14 +78,14 @@ export async function getProductById(id) {
         });
 
         if (!product) {
-            return notFoundResponse('Produk tidak ditemukan');
+            return { success: false, message: 'Produk tidak ditemukan' };
         }
 
-        return successResponse(product);
+        return { success: true, data: product, message: 'Data produk berhasil diambil' };
 
     } catch (error) {
         console.error('Error fetching product:', error);
-        return errorResponse('Terjadi kesalahan saat mengambil data produk', 500);
+        return { success: false, message: 'Terjadi kesalahan saat mengambil data produk', error: error.message };
     }
 }
 
@@ -121,7 +112,7 @@ export async function updateProduct(id, formData) {
 
         if (!validationResult.success) {
             const errors = validationResult.error.errors.map(err => err.message).join(', ');
-            return badRequestResponse(errors);
+            return { success: false, message: errors };
         }
 
         const product = await prisma.product.update({
@@ -140,19 +131,16 @@ export async function updateProduct(id, formData) {
         revalidatePath(`/products/${id}`);
         revalidatePath('/');
 
-        return successResponse({
-            message: 'Produk berhasil diperbarui',
-            data: product
-        });
+        return { success: true, data: product, message: 'Produk berhasil diperbarui' };
 
     } catch (error) {
         console.error('Error updating product:', error);
 
         if (error.code === 'P2025') {
-            return notFoundResponse('Produk tidak ditemukan');
+            return { success: false, message: 'Produk tidak ditemukan' };
         }
 
-        return errorResponse('Terjadi kesalahan saat memperbarui produk', 500);
+        return { success: false, message: 'Terjadi kesalahan saat memperbarui produk', error: error.message };
     }
 }
 
@@ -170,7 +158,7 @@ export async function deleteProduct(id) {
         });
 
         if (!existingProduct) {
-            return notFoundResponse('Produk tidak ditemukan');
+            return { success: false, message: 'Produk tidak ditemukan' };
         }
 
         // Check if product is used in transactions
@@ -181,7 +169,7 @@ export async function deleteProduct(id) {
         });
 
         if (transactionItems.length > 0) {
-            return badRequestResponse('Produk tidak dapat dihapus karena sudah digunakan dalam transaksi');
+            return { success: false, message: 'Produk tidak dapat dihapus karena sudah digunakan dalam transaksi' };
         }
 
         await prisma.product.delete({
@@ -193,18 +181,16 @@ export async function deleteProduct(id) {
         revalidatePath('/products');
         revalidatePath('/');
 
-        return successResponse({
-            message: 'Produk berhasil dihapus'
-        });
+        return { success: true, message: 'Produk berhasil dihapus' };
 
     } catch (error) {
         console.error('Error deleting product:', error);
 
         if (error.code === 'P2025') {
-            return notFoundResponse('Produk tidak ditemukan');
+            return { success: false, message: 'Produk tidak ditemukan' };
         }
 
-        return errorResponse('Terjadi kesalahan saat menghapus produk', 500);
+        return { success: false, message: 'Terjadi kesalahan saat menghapus produk', error: error.message };
     }
 }
 
@@ -231,11 +217,11 @@ export async function searchProducts(query) {
             }
         });
 
-        return successResponse(products);
+        return { success: true, data: products, message: 'Data produk berhasil diambil' };
 
     } catch (error) {
         console.error('Error searching products:', error);
-        return errorResponse('Terjadi kesalahan saat mencari produk', 500);
+        return { success: false, message: 'Terjadi kesalahan saat mencari produk', error: error.message };
     }
 }
 
@@ -254,13 +240,13 @@ export async function updateProductStock(id, quantity) {
         });
 
         if (!product) {
-            return notFoundResponse('Produk tidak ditemukan');
+            return { success: false, message: 'Produk tidak ditemukan' };
         }
 
         const newStock = product.stock + quantity;
 
         if (newStock < 0) {
-            return badRequestResponse('Stok tidak mencukupi');
+            return { success: false, message: 'Stok tidak mencukupi' };
         }
 
         const updatedProduct = await prisma.product.update({
@@ -275,13 +261,10 @@ export async function updateProductStock(id, quantity) {
         revalidatePath('/products');
         revalidatePath(`/products/${id}`);
 
-        return successResponse({
-            message: 'Stok produk berhasil diperbarui',
-            data: updatedProduct
-        });
+        return { success: true, data: updatedProduct, message: 'Stok produk berhasil diperbarui' };
 
     } catch (error) {
         console.error('Error updating product stock:', error);
-        return errorResponse('Terjadi kesalahan saat memperbarui stok produk', 500);
+        return { success: false, message: 'Terjadi kesalahan saat memperbarui stok produk', error: error.message };
     }
 }
