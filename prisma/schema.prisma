@@ -10,11 +10,11 @@ datasource db {
 }
 
 model User {
-  id          String   @id @default(uuid())
-  name        String
-  email       String   @unique
-  password    String
-  role        Role     @default(CASHIER) // ADMIN or CASHIER
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String
+  role         Role          @default(CASHIER) // ADMIN or CASHIER
   transactions Transaction[]
 }
 
@@ -24,35 +24,61 @@ enum Role {
 }
 
 model Product {
-  id          String    @id @default(uuid())
-  name        String
-  price       Float
-  stock       Int
-  imageUrl    String?   // URL ke Cloudinary/Drive
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String            @id @default(uuid())
+  name         String
+  price        Float
+  stock        Int
+  imageUrl     String? // URL ke Cloudinary/Drive
+  categoryId   String?
+  category     Category?         @relation(fields: [categoryId], references: [id])
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
   transactions TransactionItem[]
+  Inventory    Inventory[]
+  Unit         Unit[]
+}
+
+model Inventory {
+  id             String   @id @default(uuid())
+  productId      String
+  wholeSalePrice Float
+  quantity       Int
+  Product        Product? @relation(fields: [productId], references: [id])
+}
+
+model Unit {
+  id        String   @id @default(uuid())
+  productId String
+  unit_type String
+  Product   Product? @relation(fields: [productId], references: [id])
+}
+
+model Category {
+  id        String    @id @default(uuid())
+  name      String
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
 }
 
 model Transaction {
-  id            String             @id @default(uuid())
+  id            String            @id @default(uuid())
   userId        String
   total         Float
-  status        TransactionStatus   @default(PENDING)
-  paymentMethod PaymentMethod       // CASH/TRANSFER/MIDTRANS/XENDIT
-  createdAt     DateTime            @default(now())
-  user          User                @relation(fields: [userId], references: [id])
+  status        TransactionStatus @default(PENDING)
+  paymentMethod PaymentMethod // CASH/TRANSFER/MIDTRANS/XENDIT
+  createdAt     DateTime          @default(now())
+  user          User              @relation(fields: [userId], references: [id])
   items         TransactionItem[]
 }
 
 model TransactionItem {
-  id              String       @id @default(uuid())
-  transactionId   String
-  productId       String
-  quantity        Int
-  priceAtPurchase Float      // Harga saat transaksi (untuk histori)
-  transaction     Transaction @relation(fields: [transactionId], references: [id])
-  product         Product    @relation(fields: [productId], references: [id])
+  id            String      @id @default(uuid())
+  transactionId String
+  productId     String
+  quantity      Int
+  transaction   Transaction @relation(fields: [transactionId], references: [id])
+  product       Product     @relation(fields: [productId], references: [id])
 }
 
 enum TransactionStatus {
@@ -63,11 +89,13 @@ enum TransactionStatus {
   EXPIRED
 }
 
+enum PaymentStatus {
+  PAID
+  UNPAID
+}
+
 enum PaymentMethod {
   CASH
   TRANSFER
-  MIDTRANS
-  XENDIT
-  QRIS
-  E_WALLET // Gopay/OVO/DANA
+  QRIS // Gopay/OVO/DANA
 }
