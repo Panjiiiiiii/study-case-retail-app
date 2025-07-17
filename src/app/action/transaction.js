@@ -1,7 +1,6 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
 
 export async function createTransaction(formData) {
   try {
@@ -83,9 +82,6 @@ export async function createTransaction(formData) {
 
             return newTransaction;
         });
-
-        revalidatePath('/transactions');
-        revalidatePath('/');
 
         return { success: true, message: 'Transaksi berhasil dibuat', data: transaction };
 
@@ -209,9 +205,6 @@ export async function updateTransactionStatus(id, status) {
             }
         });
 
-        revalidatePath('/transactions');
-        revalidatePath(`/transactions/${id}`);
-
         return { success: true, data: transaction, message: 'Status transaksi berhasil diperbarui' };
 
     } catch (error) {
@@ -274,9 +267,6 @@ export async function deleteTransaction(id) {
                 }
             });
         });
-
-        revalidatePath('/transactions');
-        revalidatePath('/');
 
         return { success: true, message: 'Transaksi berhasil dihapus' };
 

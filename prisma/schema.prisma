@@ -30,12 +30,13 @@ model Product {
   stock        Int
   imageUrl     String? // URL ke Cloudinary/Drive
   categoryId   String?
+  unitId       String?
   category     Category?         @relation(fields: [categoryId], references: [id])
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   transactions TransactionItem[]
   Inventory    Inventory[]
-  Unit         Unit[]
+  unit         Unit?             @relation(fields: [unitId], references: [id])
 }
 
 model Inventory {
@@ -44,13 +45,14 @@ model Inventory {
   wholeSalePrice Float
   quantity       Int
   Product        Product? @relation(fields: [productId], references: [id])
+  createdAt      DateTime @default(now())
 }
 
 model Unit {
-  id        String   @id @default(uuid())
+  id        String    @id @default(uuid())
   productId String
   unit_type String
-  Product   Product? @relation(fields: [productId], references: [id])
+  Product   Product[]
 }
 
 model Category {
