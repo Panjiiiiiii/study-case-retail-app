@@ -1,7 +1,6 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
-import { revalidatePath } from 'next/cache';
 import { createProductSchema } from '@/lib/validator/product';
 
 export async function createProduct(formData) {
@@ -9,6 +8,8 @@ export async function createProduct(formData) {
         const name = formData.get('name');
         const price = parseFloat(formData.get('price'));
         const stock = parseInt(formData.get('stock'));
+        const unitId = formData.get('unitId');
+        const categoryId = formData.get('categoryId');
         const imageUrl = formData.get('imageUrl') || '';
 
         // Schema validation
@@ -16,7 +17,9 @@ export async function createProduct(formData) {
             name,
             price,
             stock,
-            imageUrl
+            imageUrl,
+            unitId,
+            categoryId
         });
 
         if (!validationResult.success) {
@@ -24,19 +27,34 @@ export async function createProduct(formData) {
             return badRequestResponse(errors);
         }
 
+        const existingUnit = await prisma.unit.findUnique({
+            where: {
+                id: unitId
+            }
+        });
+
+        const existingCategory = await prisma.category.findUnique({
+            where: {
+                id: categoryId
+            }
+        });
+
+        if (!existingCategory || !existingUnit) {
+            return { success: false, message: 'Kategori atau satuan produk tidak ditemukan' };
+        }
+
         const product = await prisma.product.create({
             data: {
                 name,
                 price,
                 stock,
+                unitId,
+                categoryId,
                 imageUrl: imageUrl || null
             }
         });
 
-        revalidatePath('/products');
-        revalidatePath('/');
-
-        return { success: true, message: 'Produk berhasil ditambahkan' };
+        return { success: true, message: 'Produk berhasil ditambahkan', data: product };
 
     } catch (error) {
         console.error('Error creating product:', error);
@@ -101,11 +119,15 @@ export async function updateProduct(id, formData) {
         const price = parseFloat(formData.get('price'));
         const stock = parseInt(formData.get('stock'));
         const imageUrl = formData.get('imageUrl') || '';
+        const unitId = formData.get('unitId');
+        const categoryId = formData.get('categoryId');
 
         // Schema validation
         const validationResult = createProductSchema.safeParse({
             name,
             price,
+            unitId,
+            categoryId,
             stock,
             imageUrl
         });
@@ -123,14 +145,11 @@ export async function updateProduct(id, formData) {
                 name,
                 price,
                 stock,
-                imageUrl: imageUrl || null
+                imageUrl: imageUrl || null,
+                unitId,
+                categoryId
             }
         });
-
-        revalidatePath('/products');
-        revalidatePath(`/products/${id}`);
-        revalidatePath('/');
-
         return { success: true, data: product, message: 'Produk berhasil diperbarui' };
 
     } catch (error) {
@@ -177,9 +196,6 @@ export async function deleteProduct(id) {
                 id: id
             }
         });
-
-        revalidatePath('/products');
-        revalidatePath('/');
 
         return { success: true, message: 'Produk berhasil dihapus' };
 
@@ -257,9 +273,6 @@ export async function updateProductStock(id, quantity) {
                 stock: newStock
             }
         });
-
-        revalidatePath('/products');
-        revalidatePath(`/products/${id}`);
 
         return { success: true, data: updatedProduct, message: 'Stok produk berhasil diperbarui' };
 
