@@ -14,13 +14,28 @@ model User {
   name         String
   email        String        @unique
   password     String
-  role         Role          @default(CASHIER) // ADMIN or CASHIER
+  role         Role          @default(CASHIER)
   transactions Transaction[]
 }
 
-enum Role {
-  ADMIN
-  CASHIER
+model Transaction {
+  id            String            @id @default(uuid())
+  userId        String
+  user          User              @relation(fields: [userId], references: [id], onDelete: Cascade) // ✅ Valid
+  total         Float
+  status        TransactionStatus @default(PENDING)
+  paymentMethod PaymentMethod
+  createdAt     DateTime          @default(now())
+  items         TransactionItem[]
+}
+
+model TransactionItem {
+  id            String      @id @default(uuid())
+  transactionId String
+  transaction   Transaction @relation(fields: [transactionId], references: [id], onDelete: Cascade) // ✅
+  productId     String
+  product       Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity      Int
 }
 
 model Product {
@@ -28,23 +43,23 @@ model Product {
   name         String
   price        Float
   stock        Int
-  imageUrl     String? // URL ke Cloudinary/Drive
+  imageUrl     String?
   categoryId   String?
   unitId       String?
-  category     Category?         @relation(fields: [categoryId], references: [id])
+  category     Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  unit         Unit?             @relation(fields: [unitId], references: [id], onDelete: SetNull)
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   transactions TransactionItem[]
   Inventory    Inventory[]
-  unit         Unit?             @relation(fields: [unitId], references: [id])
 }
 
 model Inventory {
   id             String   @id @default(uuid())
   productId      String
+  Product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   wholeSalePrice Float
   quantity       Int
-  Product        Product? @relation(fields: [productId], references: [id])
   createdAt      DateTime @default(now())
 }
 
@@ -63,25 +78,6 @@ model Category {
   products  Product[]
 }
 
-model Transaction {
-  id            String            @id @default(uuid())
-  userId        String
-  total         Float
-  status        TransactionStatus @default(PENDING)
-  paymentMethod PaymentMethod // CASH/TRANSFER/MIDTRANS/XENDIT
-  createdAt     DateTime          @default(now())
-  user          User              @relation(fields: [userId], references: [id])
-  items         TransactionItem[]
-}
-
-model TransactionItem {
-  id            String      @id @default(uuid())
-  transactionId String
-  productId     String
-  quantity      Int
-  transaction   Transaction @relation(fields: [transactionId], references: [id])
-  product       Product     @relation(fields: [productId], references: [id])
-}
 
 enum TransactionStatus {
   PENDING
@@ -100,4 +96,9 @@ enum PaymentMethod {
   CASH
   TRANSFER
   QRIS // Gopay/OVO/DANA
+}
+
+enum Role {
+  ADMIN
+  CASHIER
 }
