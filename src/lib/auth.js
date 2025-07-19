@@ -111,4 +111,4 @@ export const authOptions = {
   secret: process.env.NEXTAUTH_SECRET,
 };
 
-export const { handlers, auth, signIn, signOut } = NextAuth(authOptions); 
+export default NextAuth(authOptions); 
