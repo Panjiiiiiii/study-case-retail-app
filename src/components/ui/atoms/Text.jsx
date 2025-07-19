@@ -4,7 +4,7 @@ export const H1 = ({ className, children, ...props }) => {
   return (
     <h1
       className={cn(
-        "text-[44px] font-bold tracking-tight",
+        "text-[44px] font-bold",
         className
       )}
       {...props}
@@ -18,7 +18,7 @@ export const H2 = ({ className, children, ...props }) => {
   return (
     <h1
       className={cn(
-        "text-[36px] font-bold tracking-tight",
+        "text-[36px] font-bold",
         className
       )}
       {...props}
@@ -32,7 +32,7 @@ export const H3 = ({ className, children, ...props }) => {
   return (
     <h1
       className={cn(
-        "text-[28px] font-bold tracking-tight",
+        "text-[28px] font-bold",
         className
       )}
       {...props}
@@ -46,7 +46,7 @@ export const H4 = ({ className, children, ...props }) => {
   return (
     <h1
       className={cn(
-        "text-[24px] font-bold tracking-tight",
+        "text-[24px] font-bold ",
         className
       )}
       {...props}
@@ -60,7 +60,7 @@ export const H5 = ({ className, children, ...props }) => {
   return (
     <h1
       className={cn(
-        "text-[20px] font-bold tracking-tight",
+        "text-[20px] font-bold ",
         className
       )}
       {...props}
@@ -74,7 +74,7 @@ export const H6 = ({ className, children, ...props }) => {
   return (
     <h1
       className={cn(
-        "text-[16px] font-bold tracking-tight",
+        "text-[16px] font-bold ",
         className
       )}
       {...props}
