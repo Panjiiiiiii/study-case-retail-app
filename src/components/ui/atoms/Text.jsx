@@ -4,7 +4,7 @@ export const H1 = ({ className, children, ...props }) => {
   return (
     <h1
       className={cn(
-        "text-[44px] font-bold",
+        "text-[20px] font-bold text-sky-950",
         className
       )}
       {...props}
