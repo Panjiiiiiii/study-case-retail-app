@@ -34,6 +34,11 @@ export default function SignInPage() {
               className="rounded-3xl w-auto font-semibold border border-transparent hover:bg-white hover:text-sky-950 hover:border-sky-950 transition"
             />
           </div>
+
+          <P className="text-[12px] text-center text-sky-950">
+            Back to login?{" "}
+            <a href="/auth/signin" className="font-semibold cursor-pointer hover:underline">Click Here</a>
+          </P>
         </div>
       </div>
     </div>

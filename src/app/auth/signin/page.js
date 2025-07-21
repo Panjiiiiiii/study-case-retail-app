@@ -39,7 +39,7 @@ export default function SignInPage() {
 
           <P className={`text-center text-[12px]`}>
             Forgot password?{" "}
-            <span className="font-semibold cursor-pointer hover:underline">Click Here</span>
+            <a href="/auth/new-password" className="font-semibold cursor-pointer hover:underline">Click Here</a>
           </P>
 
           <div className="flex items-center my-4">
@@ -55,7 +55,7 @@ export default function SignInPage() {
 
           <P className="text-[12px] text-center mt-4 text-sky-950">
             Don’t have any account?{" "}
-            <span className="font-semibold cursor-pointer hover:underline">Register Here</span>
+            <a href="/auth/signup" className="font-semibold cursor-pointer hover:underline">Register Here</a>
           </P>
         </div>
       </div>

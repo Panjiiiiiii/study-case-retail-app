@@ -45,9 +45,14 @@ export default function SignInPage() {
           </div>
 
           <Button className={`flex items-center justify-center gap-2 border border-sky-950 text-sky-950 bg-transparent rounded-3xl py-2 text-sm hover:bg-sky-950 hover:text-white transition`}>
-            <span className="text-lg font-bold"><IoLogoGoogle/></span>
+            <span className="text-lg font-bold"><IoLogoGoogle /></span>
             Sign up with Google
           </Button>
+
+          <P className="text-[12px] text-center mt-4 text-sky-950">
+            Back to login?{" "}
+            <a href="/auth/signin" className="font-semibold cursor-pointer hover:underline">Click Here</a>
+          </P>
         </div>
       </div>
     </div>
