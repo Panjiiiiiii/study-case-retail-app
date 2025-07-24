@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/cn";
 
-export const Button = ({variant ="default", className, children, icon, ...props }) => {
+export const Button = ({variant ="default", className, children, icon, onClick, ...props }) => {
   return (
     <button
       className={cn(
@@ -13,6 +13,7 @@ export const Button = ({variant ="default", className, children, icon, ...props 
         className
       )}
       {...props}
+      onClick={onClick}
     >
       {icon && <span className="mr-2">{icon}</span>}
       {children}

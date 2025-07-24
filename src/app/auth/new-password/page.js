@@ -1,8 +1,8 @@
 "use client";
 
-import { Button } from "@/components/ui/atoms/Button";
-import { PasswordInput, TextInput } from "@/components/ui/atoms/Input";
-import { H1, P } from "@/components/ui/atoms/Text";
+import { Button } from "@/components/ui/Button";
+import { PasswordInput, TextInput } from "@/components/ui/Input";
+import { H1, P } from "@/components/ui/Text";
 
 export default function SignInPage() {
   return (
