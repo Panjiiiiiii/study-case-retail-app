@@ -1,8 +1,14 @@
+"use client";
+
 import { Button } from "@/components/ui/Button";
 import { H1 } from "@/components/ui/Text";
+import { useState } from "react";
 import { FaMagnifyingGlass, FaPlus, FaTrash } from "react-icons/fa6";
+import Pagination from "./components/pagination";
 
 export default function page(params) {
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
     const logistic = [
         {
             date: "2023-10-01",
@@ -34,10 +40,19 @@ export default function page(params) {
             quantity: 15,
             priceAction: 225000,
         },
+        {
+            date: "2023-10-05",
+            productName: "Product E",
+            quantity: 15,
+            priceAction: 225000,
+        },
     ];
+
+    const startIndex = (currentPage - 1) * itemsPerPage;
+    const paginatedItems = logistic.slice(startIndex, startIndex + itemsPerPage);
     return (
-        <div className="flex flex-col justify-start ml-[72px] py-8 pr-8">
-            <H1 className={`text-4xl mb-5`}>Logistic History</H1>
+        <div className="flex flex-col justify-start ml-[72px] py-8 pr-8 gap-4 min-h-screen">
+            <H1 className={`text-4xl mb-4`}>Logistic History</H1>
             <div className="flex flex-row items-center justify-between mb-5 gap-4">
                 <div className="relative w-[520px]">
                     <input
@@ -53,28 +68,28 @@ export default function page(params) {
                 <Button variant="success" className={`rounded-4xl p-4`}>
                     <div className="flex flex-row items-center gap-3">
                         <FaPlus size={16} />
-                        <span className="font-medium text-[16px]">Add Product</span>
+                        <span className="font-medium text-[16px]">Add Item</span>
                     </div>
                 </Button>
             </div>
             <table>
                 <thead>
                     <tr className="bg-sky-900">
-                        <th className="p-4 text-white">Date</th>
-                        <th className="p-4 text-white">Product Name</th>
-                        <th className="p-4 text-white">Quantity</th>
-                        <th className="p-4 text-white">Price Action</th>
-                        <th className="p-4 text-white">Action</th>
+                        <th className="p-4 text-white text-[20px]">Date</th>
+                        <th className="p-4 text-white text-[20px]">Product Name</th>
+                        <th className="p-4 text-white text-[20px]">Quantity</th>
+                        <th className="p-4 text-white text-[20px]">Price Action</th>
+                        <th className="p-4 text-white text-[20px]">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {logistic.map((item, index) => (
                         <tr key={index} className="bg-white text-center">
-                            <td className="p-4">{item.date}</td>
-                            <td className="p-4">{item.productName}</td>
-                            <td className="p-4">{item.quantity}</td>
-                            <td className="p-4">{item.priceAction.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
-                            <td className="p-4">
+                            <td className="p-8 text-[20px] text-sky-900">{item.date}</td>
+                            <td className="p-8 text-[20px] text-sky-900">{item.productName}</td>
+                            <td className="p-8 text-[20px] text-sky-900">{item.quantity}</td>
+                            <td className="p-8 text-[20px] text-sky-900">{item.priceAction.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
+                            <td className="p-8 text-[20px] text-sky-900">
                                 <Button className={`rounded-full p-2 bg-red-500 hover:bg-red-600 text-white`}>
                                     <span><FaTrash /></span>
                                 </Button>
@@ -83,6 +98,14 @@ export default function page(params) {
                     ))}
                 </tbody>
             </table>
+
+            <Pagination
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                totalItems={logistic.length}
+                itemsPerPage={itemsPerPage}
+            />
+
         </div>
     )
 };
