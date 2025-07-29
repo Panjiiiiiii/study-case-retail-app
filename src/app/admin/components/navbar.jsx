@@ -20,11 +20,11 @@ export default function NavbarSidebar() {
       
       {/* Cashier (Top Icon) */}
       <Link href={navItems[4].href} title={navItems[4].label}>
-        <div className="group mt-8 p-4 rounded-md hover:bg-sky-900 transition-colors flex flex-col items-center gap-1">
-          <div className="text-sky-900 group-hover:text-white transition-colors">
+        <div className="group mt-8 p-4 rounded-md hover:bg-sky-950 transition-colors flex flex-col items-center gap-1">
+          <div className="text-sky-950 group-hover:text-white transition-colors">
             {navItems[5].icon}
           </div>
-          <span className="text-sky-900 group-hover:text-white text-sm transition-colors">
+          <span className="text-sky-950 group-hover:text-white text-sm transition-colors">
             {navItems[5].label}
           </span>
         </div>
@@ -34,11 +34,11 @@ export default function NavbarSidebar() {
       <div className="flex flex-col gap-6">
         {navItems.slice(0, -2).map((item, index) => (
           <Link href={item.href} key={index} title={item.label}>
-            <div className="group p-4 rounded-md hover:bg-sky-900 transition-colors flex flex-col items-center gap-1">
-              <div className="text-sky-900 group-hover:text-white transition-colors">
+            <div className="group p-4 rounded-md hover:bg-sky-950 transition-colors flex flex-col items-center gap-1">
+              <div className="text-sky-950 group-hover:text-white transition-colors">
                 {item.icon}
               </div>
-              <span className="text-sky-900 group-hover:text-white text-sm transition-colors">
+              <span className="text-sky-950 group-hover:text-white text-sm transition-colors">
                 {item.label}
               </span>
             </div>
@@ -48,11 +48,11 @@ export default function NavbarSidebar() {
 
       {/* Logout (Bottom Icon) */}
       <Link href={navItems[3].href} title={navItems[3].label}>
-        <div className="group mb-8 p-4 rounded-md hover:bg-sky-900 transition-colors flex flex-col items-center gap-1">
-          <div className="text-sky-900 group-hover:text-white transition-colors">
+        <div className="group mb-8 p-4 rounded-md hover:bg-sky-950 transition-colors flex flex-col items-center gap-1">
+          <div className="text-sky-950 group-hover:text-white transition-colors">
             {navItems[4].icon}
           </div>
-          <span className="text-sky-900 group-hover:text-white text-sm transition-colors">
+          <span className="text-sky-950 group-hover:text-white text-sm transition-colors">
             {navItems[4].label}
           </span>
         </div>
