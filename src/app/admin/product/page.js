@@ -1,10 +1,13 @@
+"use client";
 import { FaMagnifyingGlass, FaPlus } from "react-icons/fa6";
 import CardList from "./fragments/card-list";
 import { Button } from "@/components/ui/Button";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoFilter } from "react-icons/io5";
+import { useRouter } from "next/navigation";
 
 export default function page(params) {
+    const router = useRouter();
     return (
         <div className="flex flex-col justify-start ml-[72px] py-8">
             <div className="flex flex-row items-center mb-5 gap-4">
@@ -33,7 +36,7 @@ export default function page(params) {
                 </Button>
             </div>
             <div className="mb-5">
-                <Button variant="success" className={`rounded-4xl p-3`}>
+                <Button variant="success" className={`rounded-4xl p-3 hover:bg-green-700`} onClick={() => router.push('/admin/product/add')}>
                     <div className="flex flex-row items-center gap-3">
                         <FaPlus size={16} />
                         <span className="font-light">Add Product</span>
