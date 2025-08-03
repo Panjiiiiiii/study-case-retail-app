@@ -5,44 +5,53 @@ import { H1 } from "@/components/ui/Text";
 import { useState } from "react";
 import { FaMagnifyingGlass, FaPlus, FaTrash } from "react-icons/fa6";
 import Pagination from "../components/pagination";
+import { useRouter } from "next/navigation";
+
 
 export default function page(params) {
     const [currentPage, setCurrentPage] = useState(1);
+    const router = useRouter();
     const itemsPerPage = 5;
     const logistic = [
         {
+            id: 1,
             date: "2023-10-01",
             productName: "Product A",
             quantity: 10,
             priceAction: 150000,
         },
         {
+            id: 2,
             date: "2023-10-02",
             productName: "Product B",
             quantity: 5,
             priceAction: 75000,
         },
         {
+            id: 3,
             date: "2023-10-03",
             productName: "Product C",
             quantity: 20,
             priceAction: 300000,
         },
         {
+            id: 4,
             date: "2023-10-04",
             productName: "Product D",
             quantity: 8,
             priceAction: 120000,
         },
         {
+            id: 5,
             date: "2023-10-05",
             productName: "Product E",
             quantity: 15,
             priceAction: 225000,
         },
         {
+            id: 6,
             date: "2023-10-05",
-            productName: "Product E",
+            productName: "Product F",
             quantity: 15,
             priceAction: 225000,
         },
@@ -65,7 +74,7 @@ export default function page(params) {
                         size={20}
                     />
                 </div>
-                <Button variant="success" className={`rounded-4xl p-4`}>
+                <Button variant="success" className={`rounded-4xl p-4`} onClick={() => router.push('/admin/logistic/add')}>
                     <div className="flex flex-row items-center gap-3">
                         <FaPlus size={16} />
                         <span className="font-medium text-[16px]">Add Item</span>
