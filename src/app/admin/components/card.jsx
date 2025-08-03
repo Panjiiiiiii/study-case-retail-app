@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { H1, H2, P } from "@/components/ui/Text";
 import { FaMinus, FaPencil, FaPlus, FaTrash } from "react-icons/fa6";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 
 export default function MenuCard({ product }) {
@@ -15,6 +16,8 @@ export default function MenuCard({ product }) {
             minimumFractionDigits: 0
         }).format(price);
     };
+
+    const router = useRouter();
 
     return (
         <>
@@ -36,6 +39,7 @@ export default function MenuCard({ product }) {
                         <Button
                             className={`bg-sky-600 flex flex-row gap-1 items-center rounded-4xl p-2`}
                             icon={<FaPencil className="text-[12px]"/>}
+                            onClick={()=>{router.push(`/admin/product/edit/${product.id}`)}}
                         >
                             <P className={`font-light text-[16px]`}>Edit</P>
                         </Button>
