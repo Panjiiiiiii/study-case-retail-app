@@ -2,7 +2,7 @@
 
 import { cn } from "@/lib/cn";
 import { IoMdEye, IoMdEyeOff } from "react-icons/io";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { FiUpload } from "react-icons/fi";
 import { FaMinus, FaPlus } from "react-icons/fa6";
 
@@ -135,10 +135,27 @@ export const OptionInput = ({
   );
 }
 
-export const QtyInput = ({ label, className, inputClassName }) => {
-  const [qty, setQty] = useState(0);
-  const increment = () => setQty((prev) => prev + 1);
-  const decrement = () => setQty((prev) => (prev > 0 ? prev - 1 : 0));
+export const QtyInput = ({ label, className, inputClassName, name, value, onChange }) => {
+  const [qty, setQty] = useState(value || 0);
+  
+  useEffect(() => {
+    if (value !== undefined) {
+      setQty(value);
+    }
+  }, [value]);
+
+  const increment = () => {
+    const newQty = qty + 1;
+    setQty(newQty);
+    if (onChange) onChange({ target: { name, value: newQty } });
+  };
+
+  const decrement = () => {
+    const newQty = qty > 0 ? qty - 1 : 0;
+    setQty(newQty);
+    if (onChange) onChange({ target: { name, value: newQty } });
+  };
+
   return (
     <div className={`flex flex-col ${className}`}>
       {label && (
@@ -156,6 +173,11 @@ export const QtyInput = ({ label, className, inputClassName }) => {
         >
           <span><FaMinus /></span>
         </button>
+        <input
+          type="hidden"
+          name={name}
+          value={qty}
+        />
         <input
           type="text"
           readOnly
@@ -176,7 +198,7 @@ export const QtyInput = ({ label, className, inputClassName }) => {
   );
 }
 
-export const FileInput = ({ label, name, onChange, className, inputClassName }) => {
+export const FileInput = ({ label, name, onChange, className, inputClassName, file }) => {
   const [fileName, setFileName] = useState("");
 
   const handleChange = (e) => {
@@ -225,12 +247,29 @@ export const FileInput = ({ label, name, onChange, className, inputClassName }) 
         type="file"
         onChange={handleChange}
         className="hidden"
+        accept={file}
       />
     </div>
   );
 };
 
-export const EnumInput = ({ label, name, value, onChange, options = [], className, inputClassName }) => {
+export const EnumInput = ({ label, name, value, onChange, options = [], className, inputClassName, placeholder = "Select an option" }) => {
+  const [selectedValue, setSelectedValue] = useState(value || "");
+
+  useEffect(() => {
+    if (value !== undefined) {
+      setSelectedValue(value);
+    }
+  }, [value]);
+
+  const handleChange = (e) => {
+    const newValue = e.target.value;
+    setSelectedValue(newValue);
+    if (onChange) {
+      onChange(e);
+    }
+  };
+
   return (
     <div className={`flex flex-col ${className}`}>
       {label && (
@@ -242,17 +281,20 @@ export const EnumInput = ({ label, name, value, onChange, options = [], classNam
         <select
           id={name}
           name={name}
-          value={value}
-          onChange={onChange}
+          value={selectedValue}
+          onChange={handleChange}
           className={cn(
             "px-3 py-2 border-2 border-sky-950 rounded-full bg-[#f9f9f9] text-sky-950 w-full appearance-none",
+            selectedValue === "" ? "text-gray-400" : "text-sky-950",
             inputClassName
           )}
           style={{ paddingRight: "2.5rem" }}
         >
-          <option value="" disabled>Select an option</option>
+          <option value="" disabled className="text-gray-400">
+            {placeholder}
+          </option>
           {options.map((option, index) => (
-            <option key={index} value={option.value}>
+            <option key={index} value={option.value} className="text-sky-950">
               {option.label}
             </option>
           ))}
