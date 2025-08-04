@@ -65,9 +65,8 @@ model Inventory {
 
 model Unit {
   id        String    @id @default(uuid())
-  productId String
   unit_type String
-  Product   Product[]
+  products  Product[] // 1 unit can be used by many products
 }
 
 model Category {
@@ -75,7 +74,7 @@ model Category {
   name      String
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
-  products  Product[]
+  products  Product[] // 1 category can be used by many products
 }
 
 
