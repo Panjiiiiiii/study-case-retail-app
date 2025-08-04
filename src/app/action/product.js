@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { createProductSchema } from '@/lib/validator/product';
+import cloudinary from '@/lib/cloudinary';
 
 export async function createProduct(formData) {
     try {
@@ -10,7 +11,33 @@ export async function createProduct(formData) {
         const stock = parseInt(formData.get('stock'));
         const unitId = formData.get('unitId');
         const categoryId = formData.get('categoryId');
-        const imageUrl = formData.get('imageUrl') || '';
+
+        let imageUrl;
+        const imageFile = formData.get('image');
+
+        if (imageFile && imageFile.size > 0) {
+            const arrayBuffer = await imageFile.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            const uploadResult = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream(
+                    { folder: 'erp-products'},
+                    (error, result) => {
+                        if (error) {
+                            reject(error);
+                        } else {
+                            resolve(result);
+                        }
+                    }
+                ).end(buffer);
+            });
+
+            if (uploadResult && uploadResult.secure_url) {
+                imageUrl = uploadResult.secure_url;
+            } else {
+                return { success: false, message: 'Gagal mengunggah gambar produk' };
+            }
+        }
 
         // Schema validation
         const validationResult = createProductSchema.safeParse({
