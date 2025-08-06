@@ -1,82 +1,83 @@
 "use server";
 
 import { prisma } from "@/lib/prisma"; // pastikan prisma tersedia
-import cloudinary  from "@/lib/cloudinary"; // konfigurasi cloudinary
+import cloudinary from "@/lib/cloudinary"; // konfigurasi cloudinary
 import { createProductSchema } from "@/lib/validator/product";// Zod schema
 
 export async function createProduct(prevState, formData) {
-  try {
-    const name = formData.get("name");
-    const price = parseFloat(formData.get("price"));
-    const stock = parseInt(formData.get("stock"));
-    const unitId = formData.get("unitId");
-    const categoryId = formData.get("categoryId");
+    try {
+        const name = formData.get("name");
+        const price = parseFloat(formData.get("price"));
+        const stock = parseInt(formData.get("stock"));
+        const categoryId = formData.get("categoryId");
 
-    let imageUrl;
-    const imageFile = formData.get("image");
 
-    if (imageFile && imageFile.size > 0) {
-      const arrayBuffer = await imageFile.arrayBuffer();
-      const buffer = Buffer.from(arrayBuffer);
+        let imageUrl;
+        const imageFile = formData.get("image");
 
-      const uploadResult = await new Promise((resolve, reject) => {
-        cloudinary.uploader.upload_stream(
-          { folder: "erp-products" },
-          (error, result) => {
-            if (error) reject(error);
-            else resolve(result);
-          }
-        ).end(buffer);
-      });
+        if (imageFile && imageFile.size > 0) {
+            const arrayBuffer = await imageFile.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
 
-      if (uploadResult && uploadResult.secure_url) {
-        imageUrl = uploadResult.secure_url;
-      } else {
-        return { success: false, message: "Gagal mengunggah gambar produk" };
-      }
+            const uploadResult = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream(
+                    { folder: "erp-products" },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                ).end(buffer);
+            });
+
+            if (uploadResult && uploadResult.secure_url) {
+                imageUrl = uploadResult.secure_url;
+            } else {
+                return { success: false, message: "Gagal mengunggah gambar produk" };
+            }
+        }
+
+        console.log({ name, price, stock, imageUrl, categoryId });
+
+
+        const validationResult = createProductSchema.safeParse({
+            name,
+            price,
+            stock,
+            imageUrl,
+            categoryId,
+        });
+
+        if (!validationResult.success) {
+            const errors = validationResult.error.errors.map((err) => err.message).join(", ");
+            return { success: false, message: errors };
+        }
+
+        const existingCategory = await prisma.category.findUnique({ where: { id: categoryId } });
+
+        if (!existingCategory) {
+            return { success: false, message: "Kategori atau satuan tidak ditemukan" };
+        }
+
+        const product = await prisma.product.create({
+            data: {
+                name,
+                price,
+                stock,
+                categoryId,
+                
+                imageUrl: imageUrl || null,
+            },
+        });
+
+        return {
+            success: true,
+            message: "Produk berhasil ditambahkan",
+            data: product,
+        };
+    } catch (error) {
+        console.error("Error creating product:", error);
+        return { success: false, message: "Terjadi kesalahan saat menambahkan produk" };
     }
-
-    const validationResult = createProductSchema.safeParse({
-      name,
-      price,
-      stock,
-      imageUrl,
-      unitId,
-      categoryId,
-    });
-
-    if (!validationResult.success) {
-      const errors = validationResult.error.errors.map((err) => err.message).join(", ");
-      return { success: false, message: errors };
-    }
-
-    const existingUnit = await prisma.unit.findUnique({ where: { id: unitId } });
-    const existingCategory = await prisma.category.findUnique({ where: { id: categoryId } });
-
-    if (!existingUnit || !existingCategory) {
-      return { success: false, message: "Kategori atau satuan tidak ditemukan" };
-    }
-
-    const product = await prisma.product.create({
-      data: {
-        name,
-        price,
-        stock,
-        unitId,
-        categoryId,
-        imageUrl: imageUrl || null,
-      },
-    });
-
-    return {
-      success: true,
-      message: "Produk berhasil ditambahkan",
-      data: product,
-    };
-  } catch (error) {
-    console.error("Error creating product:", error);
-    return { success: false, message: "Terjadi kesalahan saat menambahkan produk" };
-  }
 }
 
 
@@ -137,14 +138,12 @@ export async function updateProduct(id, formData) {
         const price = parseFloat(formData.get('price'));
         const stock = parseInt(formData.get('stock'));
         const imageUrl = formData.get('imageUrl') || '';
-        const unitId = formData.get('unitId');
         const categoryId = formData.get('categoryId');
 
         // Schema validation
         const validationResult = createProductSchema.safeParse({
             name,
             price,
-            unitId,
             categoryId,
             stock,
             imageUrl
@@ -164,7 +163,6 @@ export async function updateProduct(id, formData) {
                 price,
                 stock,
                 imageUrl: imageUrl || null,
-                unitId,
                 categoryId
             }
         });

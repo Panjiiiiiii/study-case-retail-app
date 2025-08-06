@@ -3,7 +3,7 @@
 import { useActionState } from "react";
 import { createProduct } from "@/app/action/product";
 import { getAllCategories } from "@/app/action/category";
-import { getAllUnits } from "@/app/action/unit";
+import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/Button";
 import { EnumInput, FileInput, NumberInput, QtyInput, TextInput } from "@/components/ui/Input";
@@ -14,9 +14,9 @@ import { toast } from "react-hot-toast";
 
 export default function FormProduct() {
   const [categories, setCategories] = useState([]);
-  const [units, setUnits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [isPending, startTransition] = useTransition();
+  const router = useRouter();
 
   const formRef = useRef(null);
   const fileRef = useRef(null);
@@ -26,15 +26,15 @@ export default function FormProduct() {
 
   useEffect(() => {
     const fetchOptions = async () => {
-      const [catRes, unitRes] = await Promise.all([getAllCategories(), getAllUnits()]);
+      const [catRes] = await Promise.all([getAllCategories()]);
       if (catRes.success) {
         setCategories(catRes.data.map((c) => ({ value: c.id, label: c.name })));
       }
-      if (unitRes.success) {
-        setUnits(unitRes.data.map((u) => ({ value: u.id, label: u.unit_type })));
+      else {
+        toast.error(catRes.message || "Failed to load categories");
       }
       setLoading(false);
-    };
+    }
     fetchOptions();
   }, []);
 
@@ -43,6 +43,7 @@ export default function FormProduct() {
       toast.success(state.message || "Product successfully added");
       if (formRef.current) formRef.current.reset();
       if (fileRef.current) fileRef.current.value = null;
+      router.push("/admin/product");
     } else if (state.success === false) {
       toast.error(state.message || "Failed to add product");
     }
@@ -79,22 +80,12 @@ export default function FormProduct() {
                 )}
               </div>
               <div className="flex flex-col gap-4">
-                <label className="text-sky-950 text-xl font-bold">Unit</label>
-                {loading ? (
-                  <div className="h-[60px] bg-gray-100 flex items-center justify-center rounded-full border-2 border-sky-950">
-                    Loading units...
-                  </div>
-                ) : (
-                  <EnumInput name="unitId" inputClassName="h-[60px]" options={units} />
-                )}
+                <label className="text-sky-950 text-xl font-bold">Price</label>
+                <NumberInput name="price" placeholder="Enter price" inputClassName="h-[60px] rounded-4xl" />
               </div>
             </div>
 
             <div className="flex flex-col gap-12 w-[400px]">
-              <div className="flex flex-col gap-4">
-                <label className="text-sky-950 text-xl font-bold">Price</label>
-                <NumberInput name="price" placeholder="Enter price" inputClassName="h-[60px] rounded-4xl" />
-              </div>
               <div className="flex flex-col gap-4">
                 <label className="text-sky-950 text-xl font-bold">Stock</label>
                 <QtyInput name="stock" inputClassName="h-[60px]" />

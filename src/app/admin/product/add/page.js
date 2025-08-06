@@ -1,4 +1,4 @@
-import FormProduct from "../fragments/form";
+import FormProduct from "./fragments/form";
 
 export default function Page() {
     return (
