@@ -1,91 +1,52 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { getAllProducts } from "@/app/action/product"; // HARUS client safe
 import MenuCard from "../../components/card";
-import { getAllProducts } from "@/app/action/product";
-import { useActionState, useEffect } from "react";
-
-const initialState = {
-    products: [],
-    loading: false,
-    error: null
-};
-
-// Wrapper function untuk useActionState
-async function fetchProductsAction(prevState, formData) {
-    try {
-        const result = await getAllProducts();
-        if (result.success) {
-            return {
-                products: result.data,
-                loading: false,
-                error: null
-            };
-        } else {
-            return {
-                products: [],
-                loading: false,
-                error: result.message || 'Failed to fetch products'
-            };
-        }
-    } catch (error) {
-        return {
-            products: [],
-            loading: false,
-            error: 'An error occurred while fetching products'
-        };
-    }
-}
+import { P } from "@/components/ui/Text";
 
 export default function CardList() {
-    const [state, formAction, isPending] = useActionState(fetchProductsAction, initialState);
+    const [products, setProducts] = useState([]);
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        // Trigger the action on component mount
-        formAction();
+        async function fetchData() {
+            const result = await getAllProducts();
+            if (result.success) setProducts(result.data);
+            else setError(result.message);
+        }
+        fetchData();
     }, []);
 
-    if (isPending) {
-        return (
-            <section>
-                <div className="grid grid-cols-5 gap-x-[56px] gap-y-[56px] pb-8">
-                    {[...Array(10)].map((_, index) => (
-                        <div key={index} className="h-[360px] bg-gray-200 rounded-xl animate-pulse"></div>
-                    ))}
-                </div>
-            </section>
-        );
-    }
+    if (error) return <p className="text-red-500">{error}</p>;
+    const [loading, setLoading] = useState(true);
 
-    if (state.error) {
-        return (
-            <section>
-                <div className="text-center p-8">
-                    <p className="text-red-500 mb-4">{state.error}</p>
-                    <button 
-                        onClick={() => formAction()} 
-                        className="bg-blue-500 text-white px-4 py-2 rounded"
-                    >
-                        Retry
-                    </button>
-                </div>
-            </section>
-        );
-    }
+    useEffect(() => {
+        async function fetchData() {
+            setLoading(true);
+            const result = await getAllProducts();
+            if (result.success) setProducts(result.data);
+            else setError(result.message);
+            setLoading(false);
+        }
+        fetchData();
+    }, []);
+
+    if (loading) return(
+        <div className="flex justify-center items-center h-full">
+            <P className="text-gray-500">Loading...</P>
+        </div>
+    )
 
     return (
-        <section>
-            <div className="grid grid-cols-5 gap-x-[56px] gap-y-[56px] pb-8">
-                {(!state.products || state.products.length === 0) ? (
-                    <p className="col-span-5 text-center text-gray-500">Tidak ada produk.</p>
-                ) : (
-                    state.products.map((product) => (
-                        <MenuCard 
-                            key={product.id}
-                            product={product}
-                        />
-                    ))
-                )}
-            </div>
-        </section>
+        <div className="grid grid-cols-5 gap-x-[56px] gap-y-[56px] pb-8">
+            {products.length === 0 ? (
+                <P className="col-span-5 text-center text-gray-500">Tidak ada produk.</P>
+            ) : (
+                products.map(product => (
+                    <MenuCard key={product.id} product={product} />
+                ))
+            )}
+        </div>
     );
 }
