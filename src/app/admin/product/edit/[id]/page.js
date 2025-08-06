@@ -1,4 +1,4 @@
-import FormProduct from "../../fragments/form";
+import FormProduct from "../../add/fragments/form";
 
 export default function Page({ params }) {
     const { id } = params;
