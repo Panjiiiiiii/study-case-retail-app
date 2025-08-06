@@ -24,9 +24,11 @@ export default function MenuCard({ product }) {
             <div className="flex-row p-2 bg-white w-[240px] h-[360px] rounded-xl shadow-md">
                 <div className="flex flex-col items-center justify-center h-full">
                     <img 
-                        src={product?.image || "/kecap.png"} 
+                        src={product?.imageUrl || "/kecap.png"} 
                         alt="Menu Image" 
-                        className="w- h-auto object-cover rounded-t-xl mb-4"
+                        width={120}
+                        height={120}
+                        className="w-[120px] h-[120px] object-cover rounded-t-xl mb-4"
                     />
                     <H2 className="text-[18px] font-bold text-sky-950 mb-1">
                         {product?.name || "Kecap Bango 180 ML"}

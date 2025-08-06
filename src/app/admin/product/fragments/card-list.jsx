@@ -1,92 +1,91 @@
+"use client";
+
 import MenuCard from "../../components/card";
+import { getAllProducts } from "@/app/action/product";
+import { useActionState, useEffect } from "react";
+
+const initialState = {
+    products: [],
+    loading: false,
+    error: null
+};
+
+// Wrapper function untuk useActionState
+async function fetchProductsAction(prevState, formData) {
+    try {
+        const result = await getAllProducts();
+        if (result.success) {
+            return {
+                products: result.data,
+                loading: false,
+                error: null
+            };
+        } else {
+            return {
+                products: [],
+                loading: false,
+                error: result.message || 'Failed to fetch products'
+            };
+        }
+    } catch (error) {
+        return {
+            products: [],
+            loading: false,
+            error: 'An error occurred while fetching products'
+        };
+    }
+}
 
 export default function CardList() {
-    // Data dummy untuk sementara
-    const products = [
-        {
-            id: 1,
-            name: "Kecap Bango 180 ML",
-            price: 20000,
-            stock: 23,
-            image: "/kecap.png"
-        },
-        {
-            id: 2,
-            name: "Minyak Goreng 1L",
-            price: 15000,
-            stock: 15,
-            image: "/kecap.png"
-        },
-        {
-            id: 3,
-            name: "Gula Pasir 1KG",
-            price: 12000,
-            stock: 30,
-            image: "/kecap.png"
-        },
-        {
-            id: 4,
-            name: "Beras Premium 5KG",
-            price: 65000,
-            stock: 8,
-            image: "/kecap.png"
-        },
-        {
-            id: 5,
-            name: "Tepung Terigu 1KG",
-            price: 8000,
-            stock: 20,
-            image: "/kecap.png"
-        },
-        {
-            id: 6,
-            name: "Susu UHT 1L",
-            price: 18000,
-            stock: 12,
-            image: "/kecap.png"
-        },
-        {
-            id: 7,
-            name: "Kecap Manis 250 ML",
-            price: 10000,
-            stock: 25,
-            image: "/kecap.png"
-        },
-        {
-            id: 8,
-            name: "Saus Sambal 200 ML",
-            price: 12000,
-            stock: 18,
-            image: "/kecap.png"
-        },
-        {
-            id: 9,
-            name: "Bubuk Kopi 100G",
-            price: 25000,
-            stock: 10,
-            image: "/kecap.png"
-        },
-        {
-            id: 10,
-            name: "Teh Celup 25 Sachet",
-            price: 15000,
-            stock: 22,
-            image: "/kecap.png"
-        }
-    ];
+    const [state, formAction, isPending] = useActionState(fetchProductsAction, initialState);
+
+    useEffect(() => {
+        // Trigger the action on component mount
+        formAction();
+    }, []);
+
+    if (isPending) {
+        return (
+            <section>
+                <div className="grid grid-cols-5 gap-x-[56px] gap-y-[56px] pb-8">
+                    {[...Array(10)].map((_, index) => (
+                        <div key={index} className="h-[360px] bg-gray-200 rounded-xl animate-pulse"></div>
+                    ))}
+                </div>
+            </section>
+        );
+    }
+
+    if (state.error) {
+        return (
+            <section>
+                <div className="text-center p-8">
+                    <p className="text-red-500 mb-4">{state.error}</p>
+                    <button 
+                        onClick={() => formAction()} 
+                        className="bg-blue-500 text-white px-4 py-2 rounded"
+                    >
+                        Retry
+                    </button>
+                </div>
+            </section>
+        );
+    }
 
     return (
-        <>
         <section>
             <div className="grid grid-cols-5 gap-x-[56px] gap-y-[56px] pb-8">
-                {products.map((product) => (
-                    <MenuCard 
-                        key={product.id}
-                        product={product}
-                    />
-                ))}
+                {(!state.products || state.products.length === 0) ? (
+                    <p className="col-span-5 text-center text-gray-500">Tidak ada produk.</p>
+                ) : (
+                    state.products.map((product) => (
+                        <MenuCard 
+                            key={product.id}
+                            product={product}
+                        />
+                    ))
+                )}
             </div>
         </section>
-        </>
     );
-};
+}
