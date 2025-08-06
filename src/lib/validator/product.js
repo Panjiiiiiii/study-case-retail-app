@@ -5,6 +5,5 @@ export const createProductSchema = z.object({
     price: z.number().min(1, { message: 'Harga produk harus lebih dari 0' }),
     stock: z.number().min(0, { message: 'Stok produk harus lebih dari 0' }),
     imageUrl: z.string().min(1, { message: 'Gambar produk harus diisi' }),
-    unitId: z.string().min(1, { message: 'Satuan produk harus diisi' }),
     categoryId: z.string().min(1, { message: 'Kategori produk harus diisi' }),
 });
