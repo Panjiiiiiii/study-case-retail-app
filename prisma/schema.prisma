@@ -45,9 +45,7 @@ model Product {
   stock        Int
   imageUrl     String?
   categoryId   String?
-  unitId       String?
   category     Category?         @relation(fields: [categoryId], references: [id], onDelete: SetNull)
-  unit         Unit?             @relation(fields: [unitId], references: [id], onDelete: SetNull)
   createdAt    DateTime          @default(now())
   updatedAt    DateTime          @updatedAt
   transactions TransactionItem[]
@@ -63,18 +61,11 @@ model Inventory {
   createdAt      DateTime @default(now())
 }
 
-model Unit {
-  id        String    @id @default(uuid())
-  unit_type String
-  products  Product[] // 1 unit can be used by many products
-}
-
 model Category {
   id        String    @id @default(uuid())
   name      String
   products  Product[] // 1 category can be used by many products
 }
-
 
 enum TransactionStatus {
   PENDING
