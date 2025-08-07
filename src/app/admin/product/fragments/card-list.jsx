@@ -1,52 +1,69 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { getAllProducts } from "@/app/action/product"; // HARUS client safe
+import { useState, useEffect } from "react";
+import { getAllProducts } from "@/app/action/product";
+import DeleteProduct from "../delete/[id]/deleteProduct";
+import { Modal } from "../../components/Modal";
 import MenuCard from "../../components/card";
 import { P } from "@/components/ui/Text";
 
-export default function CardList() {
+export default function ProductPage() {
     const [products, setProducts] = useState([]);
-    const [error, setError] = useState(null);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
-        async function fetchData() {
-            const result = await getAllProducts();
-            if (result.success) setProducts(result.data);
-            else setError(result.message);
-        }
-        fetchData();
+        loadProducts();
     }, []);
 
-    if (error) return <p className="text-red-500">{error}</p>;
-    const [loading, setLoading] = useState(true);
+    async function loadProducts() {
+        const res = await getAllProducts();
+        if (res.success) setProducts(res.data);
+    }
 
-    useEffect(() => {
-        async function fetchData() {
-            setLoading(true);
-            const result = await getAllProducts();
-            if (result.success) setProducts(result.data);
-            else setError(result.message);
-            setLoading(false);
-        }
-        fetchData();
-    }, []);
+    function openDeleteModal(product) {
+        setSelectedProduct(product);
+        setIsModalOpen(true);
+    }
 
-    if (loading) return(
-        <div className="flex justify-center items-center h-full">
-            <P className="text-gray-500">Loading...</P>
-        </div>
-    )
+    function closeModal() {
+        setSelectedProduct(null);
+        setIsModalOpen(false);
+    }
+
+    function handleDeleteSuccess() {
+        setProducts(prev => prev.filter(p => p.id !== selectedProduct.id));
+        closeModal();
+    }
 
     return (
         <div className="grid grid-cols-5 gap-x-[44px] gap-y-[56px] pb-8">
             {products.length === 0 ? (
-                <P className="col-span-5 text-center text-gray-500">Tidak ada produk.</P>
+                <P className="col-span-5 text-center text-gray-500">
+                    Tidak ada produk.
+                </P>
             ) : (
                 products.map(product => (
-                    <MenuCard key={product.id} product={product} />
+                    <MenuCard
+                        key={product.id}
+                        product={product}
+                        onDelete={() => openDeleteModal(product)} // 🔹 trigger modal
+                    />
                 ))
             )}
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                title="Hapus Produk"
+            >
+                {selectedProduct && (
+                    <DeleteProduct
+                        id={selectedProduct.id}
+                        onDelete={handleDeleteSuccess}
+                    />
+                )}
+            </Modal>
         </div>
     );
 }

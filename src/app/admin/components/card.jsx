@@ -3,11 +3,10 @@
 import { Button } from "@/components/ui/Button";
 import { H1, H2, P } from "@/components/ui/Text";
 import { FaMinus, FaPencil, FaPlus, FaTrash } from "react-icons/fa6";
-import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-
-export default function MenuCard({ product }) {
+export default function MenuCard({ product, onDelete }) {
+    const router = useRouter();
     // Format harga ke format Rupiah
     const formatPrice = (price) => {
         return new Intl.NumberFormat('id-ID', {
@@ -16,8 +15,6 @@ export default function MenuCard({ product }) {
             minimumFractionDigits: 0
         }).format(price);
     };
-
-    const router = useRouter();
 
     return (
         <>
@@ -49,6 +46,7 @@ export default function MenuCard({ product }) {
                             variant="danger"
                             className={`bg-red-600 flex flex-row gap-1 items-center rounded-4xl p-2`}
                             icon={<FaTrash className="text-[12px]"/>}
+                            onClick={onDelete}
                         >
                             <P className={`font-light text-[16px]`}>Delete</P>
                         </Button>
