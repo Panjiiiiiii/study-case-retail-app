@@ -116,79 +116,72 @@ export async function getProductById(id) {
     }
 }
 
-export async function updateProduct(id, formData) {
-    try {
-        const name = formData.get('name');
-        const price = parseFloat(formData.get('price'));
-        const stock = parseInt(formData.get('stock'));
-        const imageFile = formData.get("image");
-        const categoryId = formData.get('categoryId');
+export async function updateProduct(prevState, formData) {
+  try {
+    const id = formData.get("id");
+    const name = formData.get("name");
+    const price = parseFloat(formData.get("price"));
+    const stock = parseInt(formData.get("stock"));
+    const categoryId = formData.get("categoryId");
+    const imageFile = formData.get("image");
 
-        let imageUrl;
+    let imageUrl;
 
-        const existingProduct = await prisma.product.findUnique({
-            where: {
-                id: id
-            }
-        });
-        
-        if (!existingProduct) {
-            return { success: false, message: 'Produk tidak ditemukan' };
-        }
+    const existingProduct = await prisma.product.findUnique({
+      where: { id },
+    });
 
-        if (imageFile && imageFile.size > 0) {
-            const arrayBuffer = await imageFile.arrayBuffer();
-            const buffer = Buffer.from(arrayBuffer);
-
-            const uploadResult = await new Promise((resolve, reject) => {
-                cloudinary.uploader.upload_stream(
-                    { folder: "erp-products" },
-                    (error, result) => {
-                        if (error) reject(error);
-                        else resolve(result);
-                    }
-                ).end(buffer);
-            });
-
-            if (uploadResult && uploadResult.secure_url) {
-                imageUrl = uploadResult.secure_url;
-            } else {
-                return { success: false, message: "Gagal mengunggah gambar produk" };
-            }
-        }
-
-        // Schema validation
-        const validationResult = createProductSchema.safeParse({
-            name,
-            price,
-            categoryId,
-            stock,
-            imageUrl
-        });
-
-        if (!validationResult.success) {
-            const errors = validationResult.error.errors.map(err => err.message).join(', ');
-            return { success: false, message: errors };
-        }
-
-        const product = await prisma.product.update({
-            where: {
-                id: id
-            },
-            data: {
-                name: name || existingProduct.name,
-                price : price || existingProduct.price,
-                stock: stock || existingProduct.stock,
-                imageUrl: imageUrl || existingProduct.imageUrl,
-                categoryId: categoryId || existingProduct.categoryId
-            }
-        });
-        return { success: true, data: product, message: 'Produk berhasil diperbarui' };
-
-    } catch (error) {
-        console.error('Error updating product:', error);
-        return { success: false, message: 'Terjadi kesalahan saat memperbarui produk', error: error.message };
+    if (!existingProduct) {
+      return { success: false, message: "Produk tidak ditemukan" };
     }
+
+    // Cek apakah user upload file baru
+    if (imageFile && typeof imageFile === "object" && imageFile.size > 0) {
+      const arrayBuffer = await imageFile.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+
+      const uploadResult = await new Promise((resolve, reject) => {
+        cloudinary.uploader.upload_stream(
+          { folder: "erp-products" },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        ).end(buffer);
+      });
+
+      if (uploadResult && uploadResult.secure_url) {
+        imageUrl = uploadResult.secure_url;
+      }
+    } else {
+      // Kalau gak upload gambar baru, pakai URL lama
+      imageUrl = existingProduct.imageUrl;
+    }
+
+    const product = await prisma.product.update({
+      where: { id },
+      data: {
+        name: name || existingProduct.name,
+        price: isNaN(price) ? existingProduct.price : price,
+        stock: isNaN(stock) ? existingProduct.stock : stock,
+        categoryId: categoryId || existingProduct.categoryId,
+        imageUrl,
+      },
+    });
+
+    return {
+      success: true,
+      data: product,
+      message: "Produk berhasil diperbarui",
+    };
+  } catch (error) {
+    console.error("Error updating product:", error);
+    return {
+      success: false,
+      message: "Terjadi kesalahan saat memperbarui produk",
+      error: error.message,
+    };
+  }
 }
 
 export async function deleteProduct(id) {
