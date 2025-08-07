@@ -39,7 +39,7 @@ export default function CardList() {
     )
 
     return (
-        <div className="grid grid-cols-5 gap-x-[56px] gap-y-[56px] pb-8">
+        <div className="grid grid-cols-5 gap-x-[44px] gap-y-[56px] pb-8">
             {products.length === 0 ? (
                 <P className="col-span-5 text-center text-gray-500">Tidak ada produk.</P>
             ) : (
