@@ -176,11 +176,11 @@ export async function updateProduct(id, formData) {
                 id: id
             },
             data: {
-                name,
-                price,
-                stock,
-                imageUrl: imageUrl || null,
-                categoryId
+                name: name || existingProduct.name,
+                price : price || existingProduct.price,
+                stock: stock || existingProduct.stock,
+                imageUrl: imageUrl || existingProduct.imageUrl,
+                categoryId: categoryId || existingProduct.categoryId
             }
         });
         return { success: true, data: product, message: 'Produk berhasil diperbarui' };
