@@ -64,7 +64,7 @@ export async function createProduct(prevState, formData) {
                 price,
                 stock,
                 categoryId,
-                
+
                 imageUrl: imageUrl || null,
             },
         });
@@ -80,11 +80,6 @@ export async function createProduct(prevState, formData) {
     }
 }
 
-
-/**
- * Get all products
- * @returns {NextResponse} - Response with array of products
- */
 export async function getAllProducts() {
     try {
         const products = await prisma.product.findMany({
@@ -101,11 +96,6 @@ export async function getAllProducts() {
     }
 }
 
-/**
- * Get a single product by ID
- * @param {number} id - Product ID
- * @returns {NextResponse} - Response with product data
- */
 export async function getProductById(id) {
     try {
         const product = await prisma.product.findUnique({
@@ -126,19 +116,46 @@ export async function getProductById(id) {
     }
 }
 
-/**
- * Update a product
- * @param {number} id - Product ID
- * @param {Object} formData - Updated product data
- * @returns {NextResponse} - Response with success status and message
- */
 export async function updateProduct(id, formData) {
     try {
         const name = formData.get('name');
         const price = parseFloat(formData.get('price'));
         const stock = parseInt(formData.get('stock'));
-        const imageUrl = formData.get('imageUrl') || '';
+        const imageFile = formData.get("image");
         const categoryId = formData.get('categoryId');
+
+        let imageUrl;
+
+        const existingProduct = await prisma.product.findUnique({
+            where: {
+                id: id
+            }
+        });
+        
+        if (!existingProduct) {
+            return { success: false, message: 'Produk tidak ditemukan' };
+        }
+
+        if (imageFile && imageFile.size > 0) {
+            const arrayBuffer = await imageFile.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
+
+            const uploadResult = await new Promise((resolve, reject) => {
+                cloudinary.uploader.upload_stream(
+                    { folder: "erp-products" },
+                    (error, result) => {
+                        if (error) reject(error);
+                        else resolve(result);
+                    }
+                ).end(buffer);
+            });
+
+            if (uploadResult && uploadResult.secure_url) {
+                imageUrl = uploadResult.secure_url;
+            } else {
+                return { success: false, message: "Gagal mengunggah gambar produk" };
+            }
+        }
 
         // Schema validation
         const validationResult = createProductSchema.safeParse({
@@ -170,19 +187,10 @@ export async function updateProduct(id, formData) {
 
     } catch (error) {
         console.error('Error updating product:', error);
-
-        if (error.code === 'P2025') {
-            return { success: false, message: 'Produk tidak ditemukan' };
-        }
-
         return { success: false, message: 'Terjadi kesalahan saat memperbarui produk', error: error.message };
     }
 }
 
-/**
- * Delete a product
- * @returns {NextResponse} - Response with success status and message
- */
 export async function deleteProduct(id) {
     try {
         // Check if product exists
@@ -226,11 +234,6 @@ export async function deleteProduct(id) {
     }
 }
 
-/**
- * Search products by name
- * @param {string} query - Search query
- * @returns {NextResponse} - Response with array of matching products
- */
 export async function searchProducts(query) {
     try {
         if (!query || query.trim() === '') {
@@ -257,12 +260,6 @@ export async function searchProducts(query) {
     }
 }
 
-/**
- * Update product stock
- * @param {number} id - Product ID
- * @param {number} quantity - Quantity to add/subtract (positive for add, negative for subtract)
- * @returns {NextResponse} - Response with success status and message
- */
 export async function updateProductStock(id, quantity) {
     try {
         const product = await prisma.product.findUnique({
