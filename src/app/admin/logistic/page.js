@@ -2,60 +2,48 @@
 
 import { Button } from "@/components/ui/Button";
 import { H1 } from "@/components/ui/Text";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaMagnifyingGlass, FaPlus, FaTrash } from "react-icons/fa6";
 import Pagination from "../components/pagination";
 import { useRouter } from "next/navigation";
+import { getInventory } from "@/app/action/inventory";
+import { Modal } from "../components/Modal";
+import DeleteInventory from "./delete/[id]/deleteInventory";
 
 
 export default function page(params) {
     const [currentPage, setCurrentPage] = useState(1);
+    const [logistic, setLogistic] = useState([]);
+    const [selectedInventory, setSelectedInventory] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
     const itemsPerPage = 5;
-    const logistic = [
-        {
-            id: 1,
-            date: "2023-10-01",
-            productName: "Product A",
-            quantity: 10,
-            priceAction: 150000,
-        },
-        {
-            id: 2,
-            date: "2023-10-02",
-            productName: "Product B",
-            quantity: 5,
-            priceAction: 75000,
-        },
-        {
-            id: 3,
-            date: "2023-10-03",
-            productName: "Product C",
-            quantity: 20,
-            priceAction: 300000,
-        },
-        {
-            id: 4,
-            date: "2023-10-04",
-            productName: "Product D",
-            quantity: 8,
-            priceAction: 120000,
-        },
-        {
-            id: 5,
-            date: "2023-10-05",
-            productName: "Product E",
-            quantity: 15,
-            priceAction: 225000,
-        },
-        {
-            id: 6,
-            date: "2023-10-05",
-            productName: "Product F",
-            quantity: 15,
-            priceAction: 225000,
-        },
-    ];
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const res = await getInventory();
+            console.log("Logistic Data:", res);
+            if (res.success) {
+                setLogistic(res.data);
+            }
+        };
+        fetchData();
+    }, []);
+
+    function openDeleteModal(inventory) {
+        setSelectedInventory(inventory);
+        setIsModalOpen(true);
+    }
+
+    function closeModal() {
+        setSelectedInventory(null);
+        setIsModalOpen(false);
+    }
+
+    function handleDeleteSuccess() {
+        setLogistic(prev => prev.filter(item => item.id !== selectedInventory.id));
+        closeModal();
+    }
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedItems = logistic.slice(startIndex, startIndex + itemsPerPage);
@@ -94,12 +82,25 @@ export default function page(params) {
                 <tbody>
                     {logistic.map((item, index) => (
                         <tr key={index} className="bg-white text-center">
-                            <td className="p-8 text-[20px] text-sky-950">{item.date}</td>
-                            <td className="p-8 text-[20px] text-sky-950">{item.productName}</td>
-                            <td className="p-8 text-[20px] text-sky-950">{item.quantity}</td>
-                            <td className="p-8 text-[20px] text-sky-950">{item.priceAction.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
                             <td className="p-8 text-[20px] text-sky-950">
-                                <Button className={`rounded-full p-2 bg-red-500 hover:bg-red-600 text-white`}>
+                            {new Date(item.date).toLocaleDateString('id-ID', {
+                                day: '2-digit',
+                                month: '2-digit',
+                                year: 'numeric'
+                            })}
+                            </td>
+                            <td className="p-8 text-[20px] text-sky-950">{item.product}</td>
+                            <td className="p-8 text-[20px] text-sky-950">{item.quantity}</td>
+                            <td className="p-8 text-[20px] text-sky-950">
+                            {item?.price
+                                ? item.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
+                                : 'Rp 0'}
+                            </td>
+                            <td className="p-8 text-[20px] text-sky-950">
+                                <Button 
+                                    className={`rounded-full p-2 bg-red-500 hover:bg-red-600 text-white`}
+                                    onClick={() => openDeleteModal(item)}
+                                >
                                     <span><FaTrash /></span>
                                 </Button>
                             </td>
@@ -113,6 +114,20 @@ export default function page(params) {
                 totalItems={logistic.length}
                 itemsPerPage={itemsPerPage}
             />
+
+            <Modal
+                isOpen={isModalOpen}
+                onClose={closeModal}
+                title="Hapus Inventory"
+            >
+                {selectedInventory && (
+                    <DeleteInventory
+                        id={selectedInventory.id}
+                        onDelete={handleDeleteSuccess}
+                        onCancel={closeModal}
+                    />
+                )}
+            </Modal>
         </div>
     )
 };

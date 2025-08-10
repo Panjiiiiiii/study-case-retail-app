@@ -2,49 +2,39 @@
 
 import { prisma } from '@/lib/prisma';
 
-export async function createInventory(formData) {
-    try {
-        const productId = formData.get('productId');
-        const wholeSalePrice = parseFloat(formData.get('wholeSalePrice'));
-        const quantity = parseInt(formData.get('quantity'));
 
-        const result = await prisma.$transaction(async (tx) => {
-            const existingProduct = await tx.product.findUnique({
-                where: {
-                    id: productId
-                }
-            });
-
-            if (!existingProduct) {
-                throw new Error('Produk tidak ditemukan');
-            }
-
-            const inventory = await tx.inventory.create({
-                data: {
-                    productId,
-                    wholeSalePrice,
-                    quantity
-                }
-            });
-
-            await tx.product.update({
-                where: {
-                    id: productId
-                },
-                data: {
-                    stock: existingProduct.stock + quantity
-                }
-            });
-
-            return inventory;
-        });
-
-        return { success: true, message: 'Inventaris berhasil dibuat', data: result };
-    } catch (error) {
-        console.error('Error creating inventory:', error);
-        const message = error.message === 'Produk tidak ditemukan' ? error.message : 'Gagal membuat inventaris';
-        return { success: false, message };
+export async function createInventoryMany(list) {
+  try {
+    if (!Array.isArray(list) || list.length === 0) {
+      return { success: false, message: "Tidak ada data yang dikirim" };
     }
+
+    await prisma.$transaction(async (tx) => {
+      // Insert ke inventory
+      await tx.inventory.createMany({
+        data: list.map(item => ({
+          productId: item.id,
+          wholeSalePrice: item.wholesalePrice,
+          quantity: item.stock
+        }))
+      });
+
+      // Update stok produk satu-satu
+      for (const item of list) {
+        await tx.product.update({
+          where: { id: item.id },
+          data: {
+            stock: { increment: item.stock }
+          }
+        });
+      }
+    });
+
+    return { success: true, message: "Inventaris berhasil ditambahkan" };
+  } catch (error) {
+    console.error("Error createInventoryMany:", error);
+    return { success: false, message: "Gagal menambahkan inventaris" };
+  }
 }
 
 export async function getInventory () {
@@ -62,14 +52,14 @@ export async function getInventory () {
         for (const item of inventory) {
             data.push({
                 id: item.id,
-                createdAt : item.createdAt,
-                product_name : item.Product.name,
-                wholeSalePrice: item.wholeSalePrice,
+                date : item.createdAt,
+                product : item.Product.name,
+                price : item.wholeSalePrice,
                 quantity: item.quantity,
             })
         }
         
-        return { success: true, message: 'Inventaris berhasil diambil', data: inventory };
+        return { success: true, message: 'Inventaris berhasil diambil', data };
     } catch (error) {
         console.error('Error getting inventory:', error);
         return { success: false, message: 'Gagal mengambil inventaris' };
