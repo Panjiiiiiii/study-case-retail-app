@@ -5,9 +5,9 @@ import { IoLogOut } from "react-icons/io5";
 import Link from "next/link";
 
 const navItems = [
-  { icon: <AiFillHome className="text-[28px]" />, label: 'Home', href: '/' },
-  { icon: <FaCartShopping className="text-[28px]" />, label: 'Payment', href: '/cart' },
-  { icon: <LuArrowDownUp className="text-[28px]" />, label: 'History', href: '/history' },
+  { icon: <AiFillHome className="text-[28px]" />, label: 'Home', href: '/user/' },
+  { icon: <FaCartShopping className="text-[28px]" />, label: 'Payment', href: '/user/#' },
+  { icon: <LuArrowDownUp className="text-[28px]" />, label: 'History', href: '/user/history' },
   { icon: <IoLogOut className="text-[28px]" />, label: 'Logout', href: '/logout' },
   { icon: <FaUser className="text-[28px]" />, label: 'Cashier', href: '/user' },
 ];
