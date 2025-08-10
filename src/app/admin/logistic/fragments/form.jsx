@@ -1,9 +1,14 @@
+"use client";
+
 import { Button } from "@/components/ui/Button";
 import { EnumInput, FileInput, NumberInput, OptionInput, QtyInput, TextInput } from "@/components/ui/Input";
 import { H1, P } from "@/components/ui/Text";
 import { FaPlus, FaTrash } from "react-icons/fa6";
+import { getAllProducts } from "@/app/action/product";
+import { useEffect, useState } from "react";
 
 export default function FormLogistic() {
+    const [products, setProducts] = useState([]);
     // Helper to format date as dd/mm/yyyy
     function formatDate(date) {
         const d = new Date(date);
@@ -13,6 +18,21 @@ export default function FormLogistic() {
         return `${day}/${month}/${year}`;
     }
 
+    useEffect(() => {
+    const fetchProducts = async () => {
+        const res = await getAllProducts();
+        if (res.success) {
+        const options = res.data.map((p) => ({
+            label: p.name,
+            value: p.id
+        }));
+        setProducts(options);
+        }
+    };
+    fetchProducts();
+    }, []);
+
+
     return (
     <div className="bg-white rounded-lg p-12 w-[1200px] h-[760px] mx-auto flex items-center">
         <div className="w-full">
@@ -21,7 +41,7 @@ export default function FormLogistic() {
                 <div className="flex flex-row justify-between gap-4 items-center">
                     <div className="flex flex-col gap-4">
                         <label className="text-sky-950 text-xl font-bold">Product Name</label>
-                        <EnumInput inputClassName={`h-[60px] w-[280px] rounded-4xl`} />
+                        <EnumInput inputClassName={`h-[60px] w-[280px] rounded-4xl`} name={"productName"} options={products} />
                     </div>
                     <div className="flex flex-col gap-4">
                         <label className="text-sky-950 text-xl font-bold">Stock</label>
