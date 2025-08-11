@@ -8,21 +8,18 @@ import { useState } from "react";
 
 export default function MenuCard({ product }) {
     const [quantity, setQuantity] = useState(0);
-    const [stock, setStock] = useState(product?.stock || 23); // State untuk stock yang bisa berubah
+    const [stock, setStock] = useState(product.stock); // State untuk stock yang bisa berubah
+
 
     const addQuantity = () => {
-        // Batasi maksimal quantity sesuai stock yang tersedia
-        if (quantity < stock) {
-            setQuantity(quantity + 1);
-            setStock(stock - 1); // Kurangi stock ketika quantity ditambah
+        if (quantity < product.stock) { // batas sesuai stok asli
+            setQuantity(q => q + 1);
         }
     };
 
     const minQuantity = () => {
-        // Pastikan quantity tidak kurang dari 0
         if (quantity > 0) {
-            setQuantity(quantity - 1);
-            setStock(stock + 1); // Tambah kembali stock ketika quantity dikurangi
+            setQuantity(q => q - 1);
         }
     };
 
@@ -50,7 +47,7 @@ export default function MenuCard({ product }) {
                     <P className="text-[12px] font-medium text-gray-400 mb-1">
                         {formatPrice(product?.price || 20000)}
                     </P>
-                    <P className="text-[12px] font-medium text-sky-950 mb-2">Stock: {stock}</P>
+                    <P className="text-[12px] font-medium text-sky-950 mb-2">Stock: {stock - quantity}</P>
                     <div className="flex flex-row justify-between items-center p-4 gap-4">
                         <Button 
                             onClick={minQuantity}
