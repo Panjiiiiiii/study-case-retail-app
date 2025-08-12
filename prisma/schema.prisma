@@ -23,7 +23,6 @@ model Transaction {
   userId        String
   user          User              @relation(fields: [userId], references: [id], onDelete: Cascade) // ✅ Valid
   total         Float
-  status        TransactionStatus @default(PENDING)
   paymentMethod PaymentMethod
   createdAt     DateTime          @default(now())
   items         TransactionItem[]
@@ -65,19 +64,6 @@ model Category {
   id        String    @id @default(uuid())
   name      String
   products  Product[] // 1 category can be used by many products
-}
-
-enum TransactionStatus {
-  PENDING
-  SUCCESS
-  FAILED
-  CANCELLED
-  EXPIRED
-}
-
-enum PaymentStatus {
-  PAID
-  UNPAID
 }
 
 enum PaymentMethod {
