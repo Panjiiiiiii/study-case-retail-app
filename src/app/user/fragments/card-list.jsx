@@ -29,7 +29,6 @@ export default function CardList() {
                         <MenuCard
                             key={product.id}
                             product={product}
-                            onDelete={() => openDeleteModal(product)} // 🔹 trigger modal
                         />
                     ))
                 )}

@@ -3,23 +3,50 @@
 import { Button } from "@/components/ui/Button";
 import { H1, H2, P } from "@/components/ui/Text";
 import { FaMinus, FaPlus } from "react-icons/fa6";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { addToCart, getProductQuantityInCart, updateCartItemQuantity } from "@/lib/cart";
+import toast from "react-hot-toast";
 
 
 export default function MenuCard({ product }) {
     const [quantity, setQuantity] = useState(0);
-    const [stock, setStock] = useState(product.stock); // State untuk stock yang bisa berubah
 
+    // Load quantity dari cart saat component mount dan ketika cart berubah
+    useEffect(() => {
+        const updateQuantity = () => {
+            const cartQuantity = getProductQuantityInCart(product.id);
+            setQuantity(cartQuantity);
+        };
+
+        // Load initial quantity
+        updateQuantity();
+
+        // Listen untuk perubahan cart
+        const handleCartUpdate = () => updateQuantity();
+        window.addEventListener('cartUpdated', handleCartUpdate);
+
+        return () => {
+            window.removeEventListener('cartUpdated', handleCartUpdate);
+        };
+    }, [product.id]);
 
     const addQuantity = () => {
-        if (quantity < product.stock) { // batas sesuai stok asli
-            setQuantity(q => q + 1);
+        const currentCartQuantity = getProductQuantityInCart(product.id);
+        const availableStock = product.stock - currentCartQuantity;
+        
+        if (availableStock > 0) {
+            addToCart(product.id, 1);
+            toast.success(`${product.name} ditambahkan ke keranjang`);
+        } else {
+            toast.error('Stok tidak mencukupi');
         }
     };
 
     const minQuantity = () => {
         if (quantity > 0) {
-            setQuantity(q => q - 1);
+            const newQuantity = quantity - 1;
+            updateCartItemQuantity(product.id, newQuantity);
+            toast.success(`${product.name} dikurangi dari keranjang`);
         }
     };
 
@@ -47,7 +74,7 @@ export default function MenuCard({ product }) {
                     <P className="text-[12px] font-medium text-gray-400 mb-1">
                         {formatPrice(product?.price || 20000)}
                     </P>
-                    <P className="text-[12px] font-medium text-sky-950 mb-2">Stock: {stock - quantity}</P>
+                    <P className="text-[12px] font-medium text-sky-950 mb-2">Stock: {product.stock - quantity}</P>
                     <div className="flex flex-row justify-between items-center p-4 gap-4">
                         <Button 
                             onClick={minQuantity}
@@ -59,8 +86,8 @@ export default function MenuCard({ product }) {
                         <P className={`text-16 font-semibold min-w-[20px] text-center`}>{quantity}</P>
                         <Button 
                             onClick={addQuantity}
-                            className={`w-auto h-auto text-[24px] p-[4px] rounded-4xl ${stock === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            disabled={stock === 0}
+                            className={`w-auto h-auto text-[24px] p-[4px] rounded-4xl ${product.stock - quantity === 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            disabled={product.stock - quantity === 0}
                         >
                             <span><FaPlus/></span>
                         </Button>

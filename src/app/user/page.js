@@ -7,7 +7,7 @@ import { IoFilter } from "react-icons/io5";
 export default function page(params) {
     return (
         <div className="flex flex-col justify-start h-full ml-[72px] py-8">
-            <div className="flex flex-row items-center mb-5 gap-4">
+            <div className="flex flex-row items-center mb-8 gap-4">
                 <div className="relative w-[520px]">
                     <input
                         type="text"
