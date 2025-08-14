@@ -134,14 +134,6 @@ export async function getTransactionById(id) {
                 id: id
             },
             include: {
-                user: {
-                    select: {
-                        id: true,
-                        name: true,
-                        email: true,
-                        role: true
-                    }
-                },
                 items: {
                     include: {
                         product: {
@@ -159,7 +151,23 @@ export async function getTransactionById(id) {
         if (!transaction) {
             return { success: false, message: 'Transaksi tidak ditemukan' };
         }
-        return { success: true, data: transaction, message: 'Data transaksi berhasil diambil' };
+
+        // Format data untuk response
+        const formattedData = {
+            id: transaction.id,
+            transactionDate: transaction.createdAt,
+            totalPrice: transaction.total,
+            paymentMethod: transaction.paymentMethod,
+            items: transaction.items.map(item => ({
+                productId: item.product.id,
+                productName: item.product.name,
+                productPrice: item.product.price,
+                quantity: item.quantity,
+                subtotal: item.product.price * item.quantity
+            }))
+        };
+
+        return { success: true, data: formattedData, message: 'Data transaksi berhasil diambil' };
 
     } catch (error) {
         console.error('Error fetching transaction:', error);
