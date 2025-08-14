@@ -6,12 +6,19 @@ import { useEffect, useState } from "react";
 import { FaEye, FaMagnifyingGlass, FaPlus, FaTrash } from "react-icons/fa6";
 import Pagination from "./components/pagination";
 import { useRouter } from "next/navigation";
-import { getAllTransactions } from "@/app/action/transaction";
+import { getAllTransactions, deleteTransaction } from "@/app/action/transaction";
+import TransactionsDetails from "./components/transactions";
+import { Modal } from "../components/Modal";
+import DeleteTransaction from "./components/deleteTransaction";
+import toast from "react-hot-toast";
 
 export default function page(params) {
     const [currentPage, setCurrentPage] = useState(1);
     const [transaction, setTransaction] = useState([]);
-    const [selectedInventory, setSelectedInventory] = useState(null);
+    const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [transactionToDelete, setTransactionToDelete] = useState(null);
     const router = useRouter();
     const itemsPerPage = 5;
 
@@ -26,15 +33,33 @@ export default function page(params) {
         fetchData();
     }, []);
 
-    function openDeleteModal(inventory) {
-        setSelectedInventory(inventory);
+    function openTransactionModal(transactionItem) {
+        setSelectedTransaction(transactionItem);
         setIsModalOpen(true);
     }
 
     function closeModal() {
-        setSelectedInventory(null);
+        setSelectedTransaction(null);
         setIsModalOpen(false);
     }
+
+    function openDeleteModal(transactionItem) {
+        setTransactionToDelete(transactionItem);
+        setIsDeleteModalOpen(true);
+    }
+
+    function closeDeleteModal() {
+        setTransactionToDelete(null);
+        setIsDeleteModalOpen(false);
+    }
+
+    const handleDeleteSuccess = () => {
+        if (transactionToDelete) {
+            // Refresh data transaksi
+            setTransaction(prev => prev.filter(item => item.id !== transactionToDelete.id));
+            closeDeleteModal();
+        }
+    };
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedItems = transaction.slice(startIndex, startIndex + itemsPerPage);
@@ -69,24 +94,24 @@ export default function page(params) {
                     {paginatedItems.map((item, index) => (
                         <tr key={index} className="bg-white text-center">
                             <td className="p-8 text-[20px] text-sky-950">
-                            {new Date(item.createdAt).toLocaleDateString('id-ID', {
-                                day: '2-digit',
-                                month: '2-digit',
-                                year: 'numeric'
-                            })}
+                                {new Date(item.createdAt).toLocaleDateString('id-ID', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                })}
                             </td>
                             <td className="p-8 text-[20px] text-sky-950">
                                 {item.total?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
                             </td>
                             <td className="p-8 text-[20px] text-sky-950">{item.paymentMethod}</td>
                             <td className="flex flex-row justify-center items-center text-center gap-4 p-8 text-[20px] text-sky-950">
-                                <Button 
-                                    className={`rounded-full p-2 bg-sky-600 hover:bg-red-600 text-white`}
-                                    onClick={() => openDeleteModal(item)}
+                                <Button
+                                    className={`rounded-full p-2 bg-sky-600 hover:bg-sky-700 text-white`}
+                                    onClick={() => openTransactionModal(item)}
                                 >
                                     <span className="flex items-center justify-center"><FaEye /></span>
                                 </Button>
-                                <Button 
+                                <Button
                                     className={`rounded-full p-2 bg-red-500 hover:bg-red-600 text-white`}
                                     onClick={() => openDeleteModal(item)}
                                 >
@@ -103,6 +128,35 @@ export default function page(params) {
                 totalItems={transaction.length}
                 itemsPerPage={itemsPerPage}
             />
+
+            {/* Delete Confirmation Modal */}
+            {transactionToDelete && (
+                <Modal
+                    isOpen={isDeleteModalOpen}
+                    onClose={closeDeleteModal}
+                    title="Delete transaction"
+                >
+                    <DeleteTransaction
+                        id={transactionToDelete.id}
+                        onDelete={handleDeleteSuccess}
+                        onCancel={closeDeleteModal}
+                    />
+                </Modal>
+            )}
+
+            {/* Transaction Details Modal */}
+            {selectedTransaction && (
+                <Modal
+                    isOpen={isModalOpen}
+                    onClose={closeModal}
+                    title="Transaction Details"
+                >
+                    <TransactionsDetails
+                        id={selectedTransaction.id}
+                        onClose={closeModal}
+                    />
+                </Modal>
+            )}
         </div>
     )
 };
