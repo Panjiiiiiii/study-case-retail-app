@@ -10,7 +10,6 @@ import toast from "react-hot-toast";
 export default function PaymentModal({ cartItems, total, onClose, onSuccess }) {
     const [paymentMethod, setPaymentMethod] = useState('CASH');
     const [isProcessing, setIsProcessing] = useState(false);
-    const router = useRouter();
 
     const paymentMethods = [
         { value: 'CASH', label: 'Cash' },
