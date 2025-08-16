@@ -1,18 +1,13 @@
 import { LineChartComponent } from "../../components/chart"
+import { weeklyTransactionDistribution } from "../actions/statistic"
 
-export default function LineChart() {
-    const data = [
-        {name: 'Sun', value: 250000},
-        {name: 'Mon', value: 300000},
-        {name: 'Tue', value: 200000},
-        {name: 'Wed', value: 400000},
-        {name: 'Thu', value: 350000},
-        {name: 'Fri', value: 450000},
-        {name: 'Sat', value: 500000},
-    ]
+export default async function LineChart() {
+    // Get real weekly transaction distribution data
+    const data = await weeklyTransactionDistribution();
+
     return (
         <>
-            <LineChartComponent data={data} title="Weekly Sales" className="flex-1 w-full"/>
+            <LineChartComponent data={data} title="Weekly Transaction Distribution" className="flex-1 w-full"/>
         </>
     )
 };

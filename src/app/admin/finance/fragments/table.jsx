@@ -2,100 +2,130 @@
 
 import { Button } from "@/components/ui/Button";
 import { H1 } from "@/components/ui/Text";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { FaEye, FaMagnifyingGlass, FaPlus, FaTrash } from "react-icons/fa6";
-
 import { TiArrowSortedDown } from "react-icons/ti";
 import Pagination from "../../components/pagination";
+import { useRouter } from "next/navigation";
+import { getAllTransactions, deleteTransaction } from "@/app/action/transaction";
+import TransactionsDetails from "../components/transactions";
+import DeleteTransaction from "../components/deleteTransaction";
+import toast from "react-hot-toast";
+import { Modal } from "../../components/Modal";
 
 export default function TableTransaction(params) {
     const [currentPage, setCurrentPage] = useState(1);
+    const [transaction, setTransaction] = useState([]);
+    const [selectedTransaction, setSelectedTransaction] = useState(null);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [transactionToDelete, setTransactionToDelete] = useState(null);
+    const router = useRouter();
     const itemsPerPage = 3;
-    const logistic = [
-        {
-            date: "2023-10-01",
-            total_price : 150000,
-            payment_method: "Cash",
-            status: "Paid_off",
-        },
-        {
-            date: "2023-10-02",
-            total_price : 75000,
-            payment_method: "Bank",
-            status: "Pending",
-        },
-        {
-            date: "2023-10-03",
-            total_price : 300000,
-            payment_method: "Credit Card",
-            status: "Paid_off",
-        },
-        {
-            date: "2023-10-04",
-            total_price : 120000,
-            payment_method: "Cash",
-            status: "Pending",
-        },
-        {
-            date: "2023-10-05",
-            total_price : 225000,
-            payment_method: "Bank",
-            status: "Paid_off",
-        },
-        {
-            date: "2023-10-06",
-            total_price : 225000,
-            payment_method: "Credit Card",
-            status: "Pending",
+
+    useEffect(() => {
+        const fetchData = async () => {
+            const res = await getAllTransactions();
+            console.log("Transaction Data:", res);
+            if (res.success) {
+                setTransaction(res.data);
+            }
+        };
+        fetchData();
+    }, []);
+
+    function openTransactionModal(transactionItem) {
+        setSelectedTransaction(transactionItem);
+        setIsModalOpen(true);
+    }
+
+    function closeModal() {
+        setSelectedTransaction(null);
+        setIsModalOpen(false);
+    }
+
+    function openDeleteModal(transactionItem) {
+        setTransactionToDelete(transactionItem);
+        setIsDeleteModalOpen(true);
+    }
+
+    function closeDeleteModal() {
+        setTransactionToDelete(null);
+        setIsDeleteModalOpen(false);
+    }
+
+    const handleDeleteSuccess = () => {
+        if (transactionToDelete) {
+            // Refresh data transaksi
+            setTransaction(prev => prev.filter(item => item.id !== transactionToDelete.id));
+            closeDeleteModal();
         }
-    ];
+    };
 
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedItems = logistic.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedItems = transaction.slice(startIndex, startIndex + itemsPerPage);
+    
     return (
         <>
-        <table>
-            <thead>
-                <tr className="bg-sky-950">
-                    <th className="p-4 text-white text-[20px] text-center">Date</th>
-                    <th className="p-4 text-white text-[20px] text-center">Total Price</th>
-                    <th className="p-4 text-white text-[20px] text-center">Payment Method</th>
-                    <th className="p-4 text-white text-[20px] text-center">Status</th>
-                    <th className="p-4 text-white text-[20px] text-center">Action</th>
-                </tr>
-            </thead>
-            <tbody>
-                {paginatedItems.map((item, index) => (
-                    <tr key={index} className="bg-white text-center">
-                        <td className="p-8 text-[20px] text-sky-950 text-center">{item.date}</td>
-                        <td className="p-8 text-[20px] text-sky-950 text-center">{item.total_price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}</td>
-                        <td className="p-8 text-[20px] text-sky-950 text-center">
-                            <div className="flex items-center justify-center gap-1">
-                                {item.payment_method}
-                                <TiArrowSortedDown className="text-[18px]" />
-                            </div>
-                        </td>
-                        <td className="p-8 text-[20px] text-sky-950 text-center">
-                            <div className="flex items-center justify-center gap-1">
-                                {item.status}
-                                <TiArrowSortedDown className="text-[18px]" />
-                            </div>
-                        </td>                        
-                        <td className="p-8 text-[20px] text-sky-950 text-center">
-                            <Button className={`rounded-full p-2 bg-[#0084D1] text-white`}>
-                                <span><FaEye /></span>
-                            </Button>
-                        </td>
+            <table>
+                <thead>
+                    <tr className="bg-sky-950">
+                        <th className="p-2 text-white text-[16px] text-center">Date</th>
+                        <th className="p-2 text-white text-[16px] text-center">Total Price</th>
+                        <th className="p-2 text-white text-[16px] text-center">Payment Method</th>
+                        <th className="p-2 text-white text-[16px] text-center">Action</th>
                     </tr>
-                ))}
-            </tbody>
-        </table>
-        <Pagination
-            currentPage={currentPage}
-            onPageChange={setCurrentPage}
-            totalItems={logistic.length}
-            itemsPerPage={itemsPerPage}
-        />
+                </thead>
+                <tbody>
+                    {paginatedItems.map((item, index) => (
+                        <tr key={index} className="bg-white text-center">
+                            <td className="p-2 text-[16px] text-sky-950 text-center">
+                                {new Date(item.createdAt).toLocaleDateString('id-ID', {
+                                    day: '2-digit',
+                                    month: '2-digit',
+                                    year: 'numeric'
+                                })}
+                            </td>
+                            <td className="p-2 text-[16px] text-sky-950 text-center">
+                                {item.total?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
+                            </td>
+                            <td className="p-2 text-[16px] text-sky-950 text-center">
+                                <div className="flex items-center justify-center gap-1">
+                                    {item.paymentMethod}
+                                </div>
+                            </td>
+                            <td className="flex flex-row justify-center items-center text-center gap-4 p-2 text-[16px] text-sky-950">
+                                <Button
+                                    className={`rounded-full p-2 bg-sky-600 hover:bg-sky-700 text-white`}
+                                    onClick={() => openTransactionModal(item)}
+                                >
+                                    <span className="flex items-center justify-center"><FaEye size={12}/></span>
+                                </Button>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
+            <Pagination
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+                totalItems={transaction.length}
+                itemsPerPage={itemsPerPage}
+            />
+
+            {/* Transaction Details Modal */}
+            {selectedTransaction && (
+                <Modal
+                    isOpen={isModalOpen}
+                    onClose={closeModal}
+                    title="Transaction Details"
+                >
+                    <TransactionsDetails
+                        id={selectedTransaction.id}
+                        onClose={closeModal}
+                    />
+                </Modal>
+            )}
         </>
-    )
+    );
 };

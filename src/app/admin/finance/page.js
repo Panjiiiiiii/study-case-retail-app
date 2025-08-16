@@ -6,7 +6,7 @@ import PieChart from "./fragments/pie-chart";
 import LineChart from "./fragments/line-chart";
 import { IoFilter } from "react-icons/io5";
 import TableTransaction from "./fragments/table";
-import monthlyProfit from "./actions/statistic";
+import {monthlyProfit} from "./actions/statistic";
 
 export default async function page(params) {
     const profitData = await monthlyProfit();
