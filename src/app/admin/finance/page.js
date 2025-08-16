@@ -6,8 +6,15 @@ import PieChart from "./fragments/pie-chart";
 import LineChart from "./fragments/line-chart";
 import { IoFilter } from "react-icons/io5";
 import TableTransaction from "./fragments/table";
+import monthlyProfit from "./actions/statistic";
 
-export default function page(params) {
+export default async function page(params) {
+    const profitData = await monthlyProfit();
+
+    // Helper function to format number as Rupiah
+    function formatRupiah(number) {
+        return "Rp " + number.toLocaleString("id-ID");
+    }
 
     return (
         <div className="flex flex-col justify-start ml-[72px] py-8 pr-8 gap-4">
@@ -24,15 +31,15 @@ export default function page(params) {
                 <div className="flex flex-col justify-between w-[404px]">
                     <div className="flex flex-col p-4 h-[120px] bg-white rounded-lg shadow-md">
                         <H1 className="text-xl mb-2">Total Expense This Month</H1>
-                        <P className="text-3xl font-bold text-sky-950">Rp. 1,500,000</P>
+                        <P className="text-3xl font-bold text-sky-950">{formatRupiah(profitData.monthlyExpense)}</P>
                     </div>
                     <div className="flex flex-col p-4 h-[120px] bg-white rounded-lg shadow-md">
                         <H1 className="text-xl mb-2">Total Income This Month</H1>
-                        <P className="text-3xl font-bold text-sky-950">Rp. 2,000,000</P>
+                        <P className="text-3xl font-bold text-sky-950">{formatRupiah(profitData.monthlyRevenue)}</P>
                     </div>
                     <div className="flex flex-col p-4 h-[120px] bg-white rounded-lg shadow-md">
                         <H1 className="text-xl mb-2">Total Profit This Month</H1>
-                        <P className="text-3xl font-bold text-sky-950">Rp. 500,000</P>
+                        <P className="text-3xl font-bold text-sky-950">{formatRupiah(profitData.monthlyProfit)}</P>
                     </div>
                 </div>
             </div>
