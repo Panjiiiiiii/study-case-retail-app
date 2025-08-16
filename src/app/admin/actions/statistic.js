@@ -88,3 +88,89 @@ export async function topSaleProducts() {
 
     return topProducts;
 }
+
+export async function weeklyReport() {
+  // Get date range for this week (Monday to Sunday)
+  const today = new Date();
+  const currentDay = today.getDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
+  const mondayOffset = currentDay === 0 ? -6 : 1 - currentDay; // Adjust for Sunday
+  
+  const monday = new Date(today);
+  monday.setDate(today.getDate() + mondayOffset);
+  monday.setHours(0, 0, 0, 0);
+
+  const soldItems = [];
+  const weekRevenue = [];
+  const weekTransaction = [];
+
+  // Generate data for each day of the week
+  for (let i = 0; i < 7; i++) {
+    const currentDate = new Date(monday);
+    currentDate.setDate(monday.getDate() + i);
+    
+    const startOfDay = new Date(currentDate);
+    startOfDay.setHours(0, 0, 0, 0);
+    
+    const endOfDay = new Date(currentDate);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    // Get transactions for this day
+    const transactions = await prisma.transaction.findMany({
+      where: {
+        createdAt: {
+          gte: startOfDay,
+          lt: endOfDay,
+        },
+      },
+      include: {
+        items: {
+          select: {
+            quantity: true,
+            product: {
+              select: {
+                price: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    // Calculate daily statistics
+    const dailySoldItems = transactions.reduce((sum, transaction) => {
+      const transactionTotal = transaction.items.reduce((itemSum, item) => itemSum + item.quantity, 0);
+      return sum + transactionTotal;
+    }, 0);
+
+    const dailyRevenue = transactions.reduce((sum, transaction) => {
+      const transactionTotal = transaction.items.reduce((itemSum, item) => itemSum + (item.quantity * item.product.price), 0);
+      return sum + transactionTotal;
+    }, 0);
+
+    const dailyTransactionCount = transactions.length;
+
+    // Day labels
+    const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    
+    soldItems.push({
+      label: dayLabels[i],
+      value: dailySoldItems
+    });
+
+    weekRevenue.push({
+      label: dayLabels[i],
+      value: dailyRevenue
+    });
+
+    weekTransaction.push({
+      label: dayLabels[i],
+      value: dailyTransactionCount
+    });
+  }
+
+  return {
+    soldItems,
+    weekRevenue,
+    weekTransaction
+  };
+}
