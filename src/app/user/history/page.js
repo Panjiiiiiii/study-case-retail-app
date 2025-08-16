@@ -20,7 +20,7 @@ export default function page(params) {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [transactionToDelete, setTransactionToDelete] = useState(null);
     const router = useRouter();
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -65,7 +65,7 @@ export default function page(params) {
     const paginatedItems = transaction.slice(startIndex, startIndex + itemsPerPage);
     return (
         <div className="flex flex-col justify-start ml-[72px] py-8 pr-8 gap-4">
-            <H1 className={`text-4xl mb-4`}>Logistic History</H1>
+            <H1 className={`text-4xl mb-4`}>Transaction History</H1>
             <div className="flex flex-row items-center justify-between mb-5 gap-4">
                 <div className="relative w-[520px] flex items-center">
                     <input
@@ -84,38 +84,38 @@ export default function page(params) {
             <table>
                 <thead>
                     <tr className="bg-sky-950">
-                        <th className="p-4 text-white text-[20px]">Date</th>
-                        <th className="p-4 text-white text-[20px]">Total Price</th>
-                        <th className="p-4 text-white text-[20px]">Payment method</th>
-                        <th className="p-4 text-white text-[20px]">Action</th>
+                        <th className="p-2 text-white text-[16px]">Date</th>
+                        <th className="p-2 text-white text-[16px]">Total Price</th>
+                        <th className="p-2 text-white text-[16px]">Payment method</th>
+                        <th className="p-2 text-white text-[16px]">Action</th>
                     </tr>
                 </thead>
                 <tbody>
                     {paginatedItems.map((item, index) => (
                         <tr key={index} className="bg-white text-center">
-                            <td className="p-8 text-[20px] text-sky-950">
+                            <td className="p-2 text-[16px] text-sky-950">
                                 {new Date(item.createdAt).toLocaleDateString('id-ID', {
                                     day: '2-digit',
                                     month: '2-digit',
                                     year: 'numeric'
                                 })}
                             </td>
-                            <td className="p-8 text-[20px] text-sky-950">
+                            <td className="p-2 text-[16px] text-sky-950">
                                 {item.total?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
                             </td>
-                            <td className="p-8 text-[20px] text-sky-950">{item.paymentMethod}</td>
-                            <td className="flex flex-row justify-center items-center text-center gap-4 p-8 text-[20px] text-sky-950">
+                            <td className="p-2 text-[16px] text-sky-950">{item.paymentMethod}</td>
+                            <td className="flex flex-row justify-center items-center text-center gap-4 p-2 text-[16px] text-sky-950">
                                 <Button
                                     className={`rounded-full p-2 bg-sky-600 hover:bg-sky-700 text-white`}
                                     onClick={() => openTransactionModal(item)}
                                 >
-                                    <span className="flex items-center justify-center"><FaEye /></span>
+                                    <span className="flex items-center justify-center"><FaEye size={16}/></span>
                                 </Button>
                                 <Button
                                     className={`rounded-full p-2 bg-red-500 hover:bg-red-600 text-white`}
                                     onClick={() => openDeleteModal(item)}
                                 >
-                                    <span className="flex items-center justify-center"><FaTrash /></span>
+                                    <span className="flex items-center justify-center"><FaTrash size={16}/></span>
                                 </Button>
                             </td>
                         </tr>
