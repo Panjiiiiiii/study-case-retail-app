@@ -17,7 +17,7 @@ export default function page(params) {
     const [selectedInventory, setSelectedInventory] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
-    const itemsPerPage = 5;
+    const itemsPerPage = 10;
 
     useEffect(() => {
         const fetchData = async () => {
@@ -72,36 +72,36 @@ export default function page(params) {
             <table>
                 <thead>
                     <tr className="bg-sky-950">
-                        <th className="p-4 text-white text-[20px]">Date</th>
-                        <th className="p-4 text-white text-[20px]">Product Name</th>
-                        <th className="p-4 text-white text-[20px]">Quantity</th>
-                        <th className="p-4 text-white text-[20px]">Price Action</th>
-                        <th className="p-4 text-white text-[20px]">Action</th>
+                        <th className="p-2 text-white text-[16px]">Date</th>
+                        <th className="p-2 text-white text-[16px]">Product Name</th>
+                        <th className="p-2 text-white text-[16px]">Quantity</th>
+                        <th className="p-2 text-white text-[16px]">Price Action</th>
+                        <th className="p-2 text-white text-[16px]">Action</th>
                     </tr>
                 </thead>
                 <tbody>
-                    {logistic.map((item, index) => (
+                    {paginatedItems.map((item, index) => (
                         <tr key={index} className="bg-white text-center">
-                            <td className="p-8 text-[20px] text-sky-950">
+                            <td className="p-2 text-[16px] text-sky-950">
                             {new Date(item.date).toLocaleDateString('id-ID', {
                                 day: '2-digit',
                                 month: '2-digit',
                                 year: 'numeric'
                             })}
                             </td>
-                            <td className="p-8 text-[20px] text-sky-950">{item.product}</td>
-                            <td className="p-8 text-[20px] text-sky-950">{item.quantity}</td>
-                            <td className="p-8 text-[20px] text-sky-950">
+                            <td className="p-2 text-[16px] text-sky-950">{item.product || 'Unknown Product'}</td>
+                            <td className="p-2 text-[16px] text-sky-950">{item.quantity}</td>
+                            <td className="p-2 text-[16px] text-sky-950">
                             {item?.price
                                 ? item.price.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })
                                 : 'Rp 0'}
                             </td>
-                            <td className="p-8 text-[20px] text-sky-950">
+                            <td className="p-2 text-[16px] text-sky-950">
                                 <Button 
                                     className={`rounded-full p-2 bg-red-500 hover:bg-red-600 text-white`}
                                     onClick={() => openDeleteModal(item)}
                                 >
-                                    <span><FaTrash /></span>
+                                    <span><FaTrash size={12}/></span>
                                 </Button>
                             </td>
                         </tr>
