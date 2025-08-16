@@ -25,7 +25,7 @@ export default async function page(params) {
                     <P>Create report</P>
                 </Button>
             </div>
-            <div className="flex flex-row justify-between gap-4 mb-4">
+            <div className="flex flex-row justify-between gap-4 mb-2">
                 <PieChart />
                 <LineChart />
                 <div className="flex flex-col justify-between w-[404px]">
@@ -43,8 +43,8 @@ export default async function page(params) {
                     </div>
                 </div>
             </div>
-            <div className="flex flex-col justify-start gap-4">
-                <div className="flex flex-row justify-start items-center gap-4 mb-4">
+            <div className="flex flex-col justify-start gap-2">
+                <div className="flex flex-row justify-start items-center gap-2 mb-2">
                     <H1 className={`text-2xl`}>Transaction History</H1>
                     <Button className={`p-4 rounded-4xl text-sky-950 bg-white`}>
                         <div className="flex flex-row items-center gap-3">
