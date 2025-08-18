@@ -101,7 +101,7 @@ export default function CardList() {
                 </div>
             </div>
 
-            <H1 className="mb-6 text-2xl">
+            <H1 className="mb-6 text-4xl">
                 {selectedCategory ? selectedCategory.name : 'All Products'}
             </H1>
 
