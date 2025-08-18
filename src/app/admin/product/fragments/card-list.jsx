@@ -9,13 +9,16 @@ import MenuCard from "../../components/card";
 import { P, H1 } from "@/components/ui/Text";
 import { Button } from "@/components/ui/Button";
 
-export default function CardList() {
+export default function CardList({ searchQuery }) {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [filteredProducts, setFilteredProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+
+    // Ensure searchQuery is always a string
+    const safeSearchQuery = searchQuery || "";
 
     useEffect(() => {
         loadProducts();
@@ -37,15 +40,25 @@ export default function CardList() {
         }
     }
 
-    // Filter products based on selected category
+    // Filter products based on selected category and search query
     useEffect(() => {
+        let filtered = products;
+
+        // Filter by category first
         if (selectedCategory) {
-            const filtered = products.filter(product => product.categoryId === selectedCategory.id);
-            setFilteredProducts(filtered);
-        } else {
-            setFilteredProducts(products); // Show all products if no category selected
+            filtered = filtered.filter(product => product.categoryId === selectedCategory.id);
         }
-    }, [selectedCategory, products]);
+
+        // Then filter by search query
+        if (safeSearchQuery && safeSearchQuery.trim()) {
+            filtered = filtered.filter(product => 
+                product.name.toLowerCase().includes(safeSearchQuery.toLowerCase()) ||
+                (product.category?.name && product.category.name.toLowerCase().includes(safeSearchQuery.toLowerCase()))
+            );
+        }
+
+        setFilteredProducts(filtered);
+    }, [selectedCategory, products, safeSearchQuery]);
 
     const handleCategoryClick = (category) => {
         setSelectedCategory(category);
