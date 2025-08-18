@@ -89,9 +89,9 @@ export default function CardList() {
             <H1 className="mb-6 text-4xl">
                 {selectedCategory ? selectedCategory.name : 'All Products'}
             </H1>
-            <div className="grid grid-cols-5 gap-x-[44px] gap-y-[56px] pb-8">
+            <div className="grid grid-cols-5 gap-x-[44px] gap-y-[56px] pb-8 justify-items-start">
                 {filteredProducts.length === 0 ? (
-                    <P className="col-span-5 text-center text-gray-500 justify-self-start">
+                    <P className="col-span-5 text-center text-gray-500 justify-self-center">
                         {selectedCategory 
                             ? `Tidak ada produk dalam kategori ${selectedCategory.name}.`
                             : 'Tidak ada produk.'

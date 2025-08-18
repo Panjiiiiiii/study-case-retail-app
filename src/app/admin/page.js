@@ -1,7 +1,6 @@
 "use server";
 
 import { FaMagnifyingGlass } from "react-icons/fa6";
-import CardList from "./fragments/card-list";
 import { Button } from "@/components/ui/Button";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoFilter } from "react-icons/io5";

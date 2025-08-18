@@ -1,10 +1,10 @@
 "use client";
 import { FaMagnifyingGlass, FaPlus } from "react-icons/fa6";
-import CardList from "./fragments/card-list";
 import { Button } from "@/components/ui/Button";
 import { IoIosArrowDown } from "react-icons/io";
 import { IoFilter } from "react-icons/io5";
 import { useRouter } from "next/navigation";
+import CardList from "./fragments/card-list";
 
 export default function page(params) {
     const router = useRouter();

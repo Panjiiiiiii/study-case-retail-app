@@ -9,7 +9,7 @@ import MenuCard from "../../components/card";
 import { P, H1 } from "@/components/ui/Text";
 import { Button } from "@/components/ui/Button";
 
-export default function ProductPage() {
+export default function CardList() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [selectedCategory, setSelectedCategory] = useState(null);

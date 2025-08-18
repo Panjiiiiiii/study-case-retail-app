@@ -61,7 +61,7 @@ export default function MenuCard({ product }) {
 
     return (
         <>
-            <div className="flex flex-col p-2 bg-white min-w-[220px] max-w-[280px] h-[360px] rounded-xl shadow-md">
+            <div className="flex flex-col p-2 bg-white w-[280px] h-[360px] rounded-xl shadow-md">
                 <div className="flex flex-col items-center justify-center h-full">
                     <img 
                         src={product?.imageUrl || "/kecap.png"} 
