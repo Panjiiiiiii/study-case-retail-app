@@ -22,18 +22,6 @@ export default function page(params) {
                         size={20}
                     />
                 </div>
-                <Button className={`p-4 rounded-4xl text-sky-950 bg-white`}>
-                    <div className="flex flex-row items-center gap-3">
-                        <span>Category</span>
-                        <IoIosArrowDown size={16}/>
-                    </div>
-                </Button>
-                <Button className={`p-4 rounded-4xl text-sky-950 bg-white`}>
-                    <div className="flex flex-row items-center gap-3">
-                        <span>Filter</span>
-                        <IoFilter size={16}/>
-                    </div>
-                </Button>
             </div>
             <div className="mb-5">
                 <Button variant="success" className={`rounded-4xl p-3 hover:bg-green-700`} onClick={() => router.push('/admin/product/add')}>

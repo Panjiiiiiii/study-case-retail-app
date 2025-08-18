@@ -64,8 +64,8 @@ export default function CardList() {
                         onClick={handleShowAll}
                         className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                             !selectedCategory 
-                                ? 'bg-sky-600 text-white' 
-                                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                ? 'bg-orange-600 text-white' 
+                                : 'bg-transparent text-gray-700 hover:bg-gray-300'
                         }`}
                     >
                         All Products
@@ -76,8 +76,8 @@ export default function CardList() {
                             onClick={() => handleCategoryClick(category)}
                             className={`px-4 py-2 rounded-full text-sm font-medium transition-colors ${
                                 selectedCategory?.id === category.id 
-                                    ? 'bg-sky-600 text-white' 
-                                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                    ? 'bg-orange-600 text-white' 
+                                    : 'bg-transparent text-gray-700 hover:bg-gray-300'
                             }`}
                         >
                             {category.name}
