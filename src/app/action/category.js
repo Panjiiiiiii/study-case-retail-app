@@ -4,7 +4,11 @@ import { prisma } from '@/lib/prisma';
 
 export async function getAllCategories() {
     try {
-        const categories = await prisma.category.findMany();
+        const categories = await prisma.category.findMany({
+            include: {
+                products: true
+            }
+        });
         return { success: 'Categories fetched successfully', data: categories };
     } catch (error) {
         console.error('Error fetching categories:', error);
