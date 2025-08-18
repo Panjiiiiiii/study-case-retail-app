@@ -56,7 +56,6 @@ export default function CardList() {
 
     return (
         <>
-        <section className="container mb-3">
             {/* Category Filter Buttons */}
             <div className="mb-6">
                 <div className="flex flex-wrap gap-3">
@@ -106,7 +105,6 @@ export default function CardList() {
                     ))
                 )}
             </div>
-        </section>
         </>
     );
 };
