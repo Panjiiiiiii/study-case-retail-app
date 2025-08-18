@@ -31,12 +31,16 @@ export default async function page(params) {
                 <div className="flex flex-col justify-start gap-4 p-8 bg-white rounded-md w-[400px] h-auto">
                     <P className={`text-[20px] text-sky-950`}>Top Sale Product Today</P>
                     <div className={`flex flex-col items-center gap-2 w-full`}>
-                        {topProducts.map(product => (
-                            <div key={product.product.id} className="flex flex-row justify-between w-full">
-                                <H1 className={`text-[12px]`}>{product.product.name}</H1>
-                                <H1 className={`text-[12px]`}>{product.qty} Items</H1>
-                            </div>
-                        ))}
+                        {topProducts.length === 0 ? (
+                            <P className="text-[14px] text-gray-500">Tidak ada produk terjual hari ini</P>
+                        ) : (
+                            topProducts.map(product => (
+                                <div key={product.product.id} className="flex flex-row justify-between w-full">
+                                    <H1 className={`text-[12px]`}>{product.product.name}</H1>
+                                    <H1 className={`text-[12px]`}>{product.qty} Items</H1>
+                                </div>
+                            ))
+                        )}
                     </div>
                 </div>
             </div>
