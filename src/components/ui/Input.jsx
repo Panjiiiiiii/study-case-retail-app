@@ -266,7 +266,7 @@ export const EnumInput = ({ label, name, value, onChange, options = [], classNam
     const newValue = e.target.value;
     setSelectedValue(newValue);
     if (onChange) {
-      onChange(e);
+      onChange(newValue); // Send the value, not the event
     }
   };
 

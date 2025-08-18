@@ -75,6 +75,10 @@ export default function FormProduct({ id, initialData = {} }) {
     if (fileRef.current) fileRef.current.value = null;
   };
 
+  const handleCategoryChange = (val) => {
+    setCategoryId(val);
+  };
+
   return (
     <div className="bg-white rounded-lg p-12 w-[1200px] h-[760px] mx-auto flex items-center">
       <div className="w-full">
@@ -112,8 +116,9 @@ export default function FormProduct({ id, initialData = {} }) {
                     name="categoryId"
                     options={categories}
                     value={categoryId}
-                    onChange={(val) => setCategoryId(val)}
+                    onChange={handleCategoryChange}
                     inputClassName="h-[60px]"
+                    placeholder="Select category"
                   />
                 )}
               </div>
