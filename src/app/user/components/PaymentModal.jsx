@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/Button";
 import { H2, P } from "@/components/ui/Text";
 import { createTransaction } from "@/app/action/transaction";
+import downloadPDF from "@/lib/jsPDF";
 import toast from "react-hot-toast";
 
 export default function PaymentModal({ cartItems, total, onClose, onSuccess }) {
@@ -47,6 +48,15 @@ export default function PaymentModal({ cartItems, total, onClose, onSuccess }) {
             if (result.success) {
                 toast.success('Pembayaran berhasil!');
                 
+                // Cetak struk setelah pembayaran berhasil
+                try {
+                    downloadPDF(cartItems, total, paymentMethod);
+                } catch (pdfError) {
+                    console.error('PDF generation error:', pdfError);
+                    // Jangan gagalkan transaksi jika PDF error
+                    toast.error('Pembayaran berhasil, tapi gagal mencetak struk');
+                }
+                
                 onSuccess();
                 onClose(); // Clear cart and close modal
                 window.location.reload(); // Refresh the page to reflect changes
@@ -64,11 +74,11 @@ export default function PaymentModal({ cartItems, total, onClose, onSuccess }) {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
             <div className="bg-white rounded-lg p-8 w-[500px] overflow-y-auto">
-                <H2 className="text-2xl font-bold mb-6 text-center text-sky-950">Konfirmasi Pembayaran</H2>
-                
+                <H2 className="text-2xl font-bold mb-6 text-center text-sky-950">Payment Confirmation</H2>
+
                 {/* Order Summary */}
                 <div className="mb-6">
-                    <H2 className="text-lg font-semibold mb-4 text-sky-950">Ringkasan Pesanan</H2>
+                    <H2 className="text-lg font-semibold mb-4 text-sky-950">Order Summary</H2>
                     <div className="space-y-2 max-h-[200px] overflow-y-auto">
                         {cartItems.map((item) => (
                             <div key={item.productId} className="flex justify-between items-center p-2 bg-gray-50 rounded">
@@ -91,7 +101,7 @@ export default function PaymentModal({ cartItems, total, onClose, onSuccess }) {
                 </div>
 
                 <div className="mb-6">
-                    <H2 className="text-lg font-semibold mb-4 text-sky-950">Metode Pembayaran</H2>
+                    <H2 className="text-lg font-semibold mb-4 text-sky-950">Payment Method</H2>
                     <div className="space-y-2">
                         {paymentMethods.map((method) => (
                             <label key={method.value} className="flex items-center p-3 border rounded cursor-pointer hover:bg-gray-50">
@@ -123,7 +133,7 @@ export default function PaymentModal({ cartItems, total, onClose, onSuccess }) {
                         onClick={handlePayment}
                         disabled={isProcessing || cartItems.length === 0}
                     >
-                        {isProcessing ? 'Memproses...' : 'Bayar Sekarang'}
+                        {isProcessing ? 'Memproses...' : 'Bayar'}
                     </Button>
                 </div>
             </div>
