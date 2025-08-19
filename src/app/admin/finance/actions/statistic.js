@@ -181,3 +181,45 @@ export async function weeklyTransactionDistribution() {
 
     return weeklyData;
 };
+
+export async function getAllTransactionsForReport() {
+    try {
+        // Get current month range - same as monthlyProfit function
+        const now = new Date();
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1);
+        startOfMonth.setHours(0, 0, 0, 0);
+        
+        const endOfMonth = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+        endOfMonth.setHours(23, 59, 59, 999);
+
+        const transactions = await prisma.transaction.findMany({
+            where: {
+                createdAt: {
+                    gte: startOfMonth,
+                    lte: endOfMonth,
+                },
+            },
+            select: {
+                id: true,
+                total: true,
+                paymentMethod: true,
+                userId: true,
+                createdAt: true,
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        return {
+            success: true,
+            data: transactions
+        };
+    } catch (error) {
+        console.error("Error fetching transactions for report:", error);
+        return {
+            success: false,
+            data: []
+        };
+    }
+};

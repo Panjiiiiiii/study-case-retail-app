@@ -1,12 +1,11 @@
 import { Button } from "@/components/ui/Button";
 import { H1, P } from "@/components/ui/Text";
-import { MdOutlineInsertDriveFile } from "react-icons/md";
-import { PieChartComponent } from "../components/chart";
 import PieChart from "./fragments/pie-chart";
 import LineChart from "./fragments/line-chart";
 import { IoFilter } from "react-icons/io5";
 import TableTransaction from "./fragments/table";
 import {monthlyProfit} from "./actions/statistic";
+import CreateReportButton from "./components/create-report-button";
 
 export default async function page(params) {
     const profitData = await monthlyProfit();
@@ -20,10 +19,7 @@ export default async function page(params) {
         <div className="flex flex-col justify-start ml-[72px] py-8 pr-8 gap-4">
             <div className="flex flex-row justify-between items-center mb-4">
                 <H1 className={`text-4xl`}>Finance Report</H1>
-                <Button variant="default" className={"flex items-center gap-2 rounded-4xl"}>
-                    <span><MdOutlineInsertDriveFile /></span>
-                    <P>Create report</P>
-                </Button>
+                <CreateReportButton profitData={profitData} />
             </div>
             <div className="flex flex-row justify-between gap-4 mb-2">
                 <PieChart />
