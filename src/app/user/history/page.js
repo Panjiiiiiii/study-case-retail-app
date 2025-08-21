@@ -63,24 +63,24 @@ export default function page(params) {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedItems = transaction.slice(startIndex, startIndex + itemsPerPage);
+    // Skeleton loading state
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        const fetchData = async () => {
+            setIsLoading(true);
+            const res = await getAllTransactions();
+            if (res.success) {
+                setTransaction(res.data);
+            }
+            setIsLoading(false);
+        };
+        fetchData();
+    }, []);
+
     return (
         <div className="flex flex-col justify-start ml-[72px] py-8 pr-8 gap-4">
             <H1 className={`text-4xl mb-4`}>Transaction History</H1>
-            <div className="flex flex-row items-center justify-between mb-5 gap-4">
-                <div className="relative w-[520px] flex items-center">
-                    <input
-                        type="text"
-                        placeholder="Search"
-                        className="w-full p-4 pr-12 rounded-full border-none focus:outline-sky-950 placeholder:text-sky-950 bg-white"
-                    />
-                    <span className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
-                        <FaMagnifyingGlass
-                            className="text-sky-950"
-                            size={20}
-                        />
-                    </span>
-                </div>
-            </div>
             <table>
                 <thead>
                     <tr className="bg-sky-950">
@@ -91,35 +91,58 @@ export default function page(params) {
                     </tr>
                 </thead>
                 <tbody>
-                    {paginatedItems.map((item, index) => (
-                        <tr key={index} className="bg-white text-center">
-                            <td className="p-2 text-[16px] text-sky-950">
-                                {new Date(item.createdAt).toLocaleDateString('id-ID', {
-                                    day: '2-digit',
-                                    month: '2-digit',
-                                    year: 'numeric'
-                                })}
-                            </td>
-                            <td className="p-2 text-[16px] text-sky-950">
-                                {item.total?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
-                            </td>
-                            <td className="p-2 text-[16px] text-sky-950">{item.paymentMethod}</td>
-                            <td className="flex flex-row justify-center items-center text-center gap-4 p-2 text-[16px] text-sky-950">
-                                <Button
-                                    className={`rounded-full p-2 bg-sky-600 hover:bg-sky-700 text-white`}
-                                    onClick={() => openTransactionModal(item)}
-                                >
-                                    <span className="flex items-center justify-center"><FaEye size={16}/></span>
-                                </Button>
-                                <Button
-                                    className={`rounded-full p-2 bg-red-500 hover:bg-red-600 text-white`}
-                                    onClick={() => openDeleteModal(item)}
-                                >
-                                    <span className="flex items-center justify-center"><FaTrash size={16}/></span>
-                                </Button>
-                            </td>
-                        </tr>
-                    ))}
+                    {isLoading ? (
+                        // Skeleton rows
+                        Array.from({ length: itemsPerPage }).map((_, idx) => (
+                            <tr key={idx} className="bg-white text-center animate-pulse">
+                                <td className="p-2">
+                                    <div className="h-4 bg-gray-200 rounded w-24 mx-auto"></div>
+                                </td>
+                                <td className="p-2">
+                                    <div className="h-4 bg-gray-200 rounded w-32 mx-auto"></div>
+                                </td>
+                                <td className="p-2">
+                                    <div className="h-4 bg-gray-200 rounded w-20 mx-auto"></div>
+                                </td>
+                                <td className="p-2">
+                                    <div className="flex flex-row justify-center gap-4">
+                                        <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+                                        <div className="h-8 w-8 bg-gray-200 rounded-full"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        ))
+                    ) : (
+                        paginatedItems.map((item, index) => (
+                            <tr key={index} className="bg-white text-center">
+                                <td className="p-2 text-[16px] text-sky-950">
+                                    {new Date(item.createdAt).toLocaleDateString('id-ID', {
+                                        day: '2-digit',
+                                        month: '2-digit',
+                                        year: 'numeric'
+                                    })}
+                                </td>
+                                <td className="p-2 text-[16px] text-sky-950">
+                                    {item.total?.toLocaleString('id-ID', { style: 'currency', currency: 'IDR' })}
+                                </td>
+                                <td className="p-2 text-[16px] text-sky-950">{item.paymentMethod}</td>
+                                <td className="flex flex-row justify-center items-center text-center gap-4 p-2 text-[16px] text-sky-950">
+                                    <Button
+                                        className={`rounded-full p-2 bg-sky-600 hover:bg-sky-700 text-white`}
+                                        onClick={() => openTransactionModal(item)}
+                                    >
+                                        <span className="flex items-center justify-center"><FaEye size={16}/></span>
+                                    </Button>
+                                    <Button
+                                        className={`rounded-full p-2 bg-red-500 hover:bg-red-600 text-white`}
+                                        onClick={() => openDeleteModal(item)}
+                                    >
+                                        <span className="flex items-center justify-center"><FaTrash size={16}/></span>
+                                    </Button>
+                                </td>
+                            </tr>
+                        ))
+                    )}
                 </tbody>
             </table>
             <Pagination
