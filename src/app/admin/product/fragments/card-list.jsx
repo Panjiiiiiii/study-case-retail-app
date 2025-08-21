@@ -118,7 +118,7 @@ export default function CardList({ searchQuery }) {
                 {selectedCategory ? selectedCategory.name : 'All Products'}
             </H1>
 
-            <div className="grid grid-cols-5 gap-x-[44px] gap-y-[56px] pb-8 justify-items-start">
+            <div className="grid grid-cols-5 xl:grid-cols-5 md:grid-cols-3 gap-x-[44px] gap-y-[56px] pb-8 justify-items-start">
                 {filteredProducts.length === 0 ? (
                     <P className="col-span-5 text-center text-gray-500 justify-self-center">
                         {selectedCategory 
