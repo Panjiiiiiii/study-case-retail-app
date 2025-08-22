@@ -85,38 +85,38 @@ export default function FormLogistic() {
           onSubmit={(e) => {
             e.preventDefault();
             addListedProduct();
-          }}
-        >
-          <div className="flex flex-row justify-between gap-4 items-center">
+            }}
+          >
+            <div className="flex flex-row justify-between gap-4 items-center">
             <div className="flex flex-col gap-4">
               <label className="text-sky-950 text-xl font-bold">
-                Product Name
+              Product Name
               </label>
               <EnumInput
-                inputClassName="h-[60px] w-[280px] rounded-4xl"
-                name="productName"
-                options={products}
-                value={selectedProduct}
-                onChange={(value) => setSelectedProduct(value)}
+              inputClassName="h-[60px] w-[280px] rounded-4xl"
+              name="productName"
+              options={products}
+              value={selectedProduct}
+              onChange={(value) => setSelectedProduct(value)}
               />
             </div>
             <div className="flex flex-col gap-4">
               <label className="text-sky-950 text-xl font-bold">Stock</label>
-              <QtyInput
-                inputClassName="h-[60px] w-[280px] rounded-4xl"
-                value={stock}
-                onChange={(e) => setStock(Number(e.target.value))}
+              <NumberInput
+              inputClassName="h-[60px] w-[280px] rounded-4xl"
+              value={stock}
+              onChange={(e) => setStock(Number(e.target.value))}
               />
             </div>
             <div className="flex flex-col gap-4">
               <label className="text-sky-950 text-xl font-bold">
-                Wholesale Price
+              Wholesale Price
               </label>
               <NumberInput
-                placeholder="Enter wholesale price"
-                inputClassName="h-[60px] w-[280px] rounded-4xl"
-                value={wholesalePrice}
-                onChange={(e) => setWholesalePrice(Number(e.target.value))}
+              placeholder="Enter wholesale price"
+              inputClassName="h-[60px] w-[280px] rounded-4xl"
+              value={wholesalePrice}
+              onChange={(e) => setWholesalePrice(Number(e.target.value))}
               />
             </div>
             <Button
@@ -125,62 +125,62 @@ export default function FormLogistic() {
               className="rounded-4xl p-4 h-[60px] mt-10"
             >
               <div className="flex flex-row gap-4 items-center align-middle">
-                <span>
-                  <FaPlus />
-                </span>
-                <P>Add Item</P>
+              <span>
+                <FaPlus />
+              </span>
+              <P>Add Item</P>
               </div>
             </Button>
-          </div>
-        </form>
+            </div>
+          </form>
 
-        <div className="flex flex-col gap-4">
-          <H1 className="text-2xl mb-4">
+          <div className="flex flex-col gap-4">
+            <H1 className="text-2xl mb-4">
             Listed Product At {formatDate(Date.now())}
-          </H1>
+            </H1>
 
-          <div className="max-h-52 overflow-y-auto">
+            <div className="max-h-52 overflow-y-auto">
             <table className="w-full border-collapse">
               <thead className="sticky top-0 bg-sky-950 z-10">
-                <tr>
-                  <th className="text-center p-4 text-white">Product Name</th>
-                  <th className="text-center p-4 text-white">Stock</th>
-                  <th className="text-center p-4 text-white">
-                    Wholesale Price
-                  </th>
-                  <th className="text-center p-4 text-white">Actions</th>
-                </tr>
+              <tr>
+                <th className="text-center p-4 text-white">Product Name</th>
+                <th className="text-center p-4 text-white">Stock</th>
+                <th className="text-center p-4 text-white">
+                Wholesale Price
+                </th>
+                <th className="text-center p-4 text-white">Actions</th>
+              </tr>
               </thead>
               <tbody>
-                {listedProducts.map((product, index) => (
-                  <tr
-                    key={`${product.id}-${index}`}
-                    className="bg-white border-b"
+              {listedProducts.map((product, index) => (
+                <tr
+                key={`${product.id}-${index}`}
+                className="bg-white border-b"
+                >
+                <td className="text-center p-4">{product.name}</td>
+                <td className="text-center p-4">{product.stock}</td>
+                <td className="text-center p-4">
+                  Rp {product.wholesalePrice}
+                </td>
+                <td className="text-center p-4">
+                  <Button
+                  type="button"
+                  variant="danger"
+                  className="rounded-4xl p-2"
+                  onClick={() => deleteListedProduct(index)}
                   >
-                    <td className="text-center p-4">{product.name}</td>
-                    <td className="text-center p-4">{product.stock}</td>
-                    <td className="text-center p-4">
-                      Rp {product.wholesalePrice}
-                    </td>
-                    <td className="text-center p-4">
-                      <Button
-                        type="button"
-                        variant="danger"
-                        className="rounded-4xl p-2"
-                        onClick={() => deleteListedProduct(index)}
-                      >
-                        <span>
-                          <FaTrash size={16} />
-                        </span>
-                      </Button>
-                    </td>
-                  </tr>
-                ))}
+                  <span>
+                    <FaTrash size={16} />
+                  </span>
+                  </Button>
+                </td>
+                </tr>
+              ))}
               </tbody>
             </table>
-          </div>
+            </div>
 
-          {/* Submit semua data */}
+            {/* Submit semua data */}
           <form action={formAction} className="flex justify-end">
             <Button
               type="submit"
