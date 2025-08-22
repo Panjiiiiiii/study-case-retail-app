@@ -4,34 +4,47 @@ import { AiFillHome } from "react-icons/ai";
 import { FaCartShopping, FaUser } from "react-icons/fa6";
 import { LuArrowDownUp } from "react-icons/lu";
 import { IoLogOut } from "react-icons/io5";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 const navItems = [
   { icon: <AiFillHome className="text-[28px]" />, label: "Home", href: "/user/" },
   { icon: <FaCartShopping className="text-[28px]" />, label: "Payment", href: "#" },
   { icon: <LuArrowDownUp className="text-[28px]" />, label: "History", href: "/user/history" },
-  { icon: <IoLogOut className="text-[28px]" />, label: "Logout", href: "/logout" },
-  { icon: <FaUser className="text-[28px]" />, label: "Cashier", href: "/user" },
 ];
 
 export default function NavbarSidebar({ onToggleCart }) {
+  const { data: session } = useSession();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    try {
+      await signOut({ redirect: false });
+      toast.success("Logout berhasil!");
+      router.push("/auth/signin");
+    } catch (error) {
+      console.error('Logout error:', error);
+      toast.error("Terjadi kesalahan saat logout");
+    }
+  };
+
   return (
     <aside className="fixed top-0 left-0 h-screen w-[100px] bg-white flex flex-col items-center justify-between py-4 shadow-md">
       
-      {/* Cashier (Top Icon) */}
-      <Link href={navItems[4].href} title={navItems[4].label}>
-        <div className="group mt-8 p-4 w-full rounded-md hover:bg-orange-600 transition-colors flex flex-col items-center gap-1">
-          <div className="text-orange-600 group-hover:text-white transition-colors">
-            {navItems[4].icon}
-          </div>
-          <span className="text-orange-600 group-hover:text-white text-sm transition-colors">
-            {navItems[4].label}
-          </span>
+      {/* User Info (Top Icon) */}
+      <div className="mt-8 p-4 rounded-md flex flex-col items-center gap-1">
+        <div className="text-orange-600">
+          <FaUser className="text-[28px]" />
         </div>
-      </Link>
+        <span className="text-orange-600 text-sm text-center">
+          {session?.user?.name || 'Cashier'}
+        </span>
+      </div>
 
       {/* Main Menu */}
       <div className="flex flex-col gap-6">
-        {navItems.slice(0, 3).map((item, index) => {
+        {navItems.map((item, index) => {
           if (item.label === "Payment") {
             return (
               <button
@@ -65,16 +78,18 @@ export default function NavbarSidebar({ onToggleCart }) {
       </div>
 
       {/* Logout (Bottom Icon) */}
-      <Link href={navItems[3].href} title={navItems[3].label}>
-        <div className="group mb-8 p-4 w-full rounded-md hover:bg-orange-600 transition-colors flex flex-col items-center gap-1">
-          <div className="text-orange-600 group-hover:text-white transition-colors">
-            {navItems[3].icon}
-          </div>
-          <span className="text-orange-600 group-hover:text-white text-sm transition-colors">
-            {navItems[3].label}
-          </span>
+      <button 
+        onClick={handleLogout}
+        title="Logout"
+        className="group mb-8 p-4 rounded-md hover:bg-orange-600 transition-colors flex flex-col items-center gap-1"
+      >
+        <div className="text-orange-600 group-hover:text-white transition-colors">
+          <IoLogOut className="text-[28px]" />
         </div>
-      </Link>
+        <span className="text-orange-600 group-hover:text-white text-sm transition-colors">
+          Logout
+        </span>
+      </button>
     </aside>
   );
 }
