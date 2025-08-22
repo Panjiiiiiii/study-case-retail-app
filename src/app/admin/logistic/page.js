@@ -14,6 +14,8 @@ import DeleteInventory from "./delete/[id]/deleteInventory";
 export default function page(params) {
     const [currentPage, setCurrentPage] = useState(1);
     const [logistic, setLogistic] = useState([]);
+    const [filteredLogistic, setFilteredLogistic] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
     const [selectedInventory, setSelectedInventory] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const router = useRouter();
@@ -24,11 +26,32 @@ export default function page(params) {
             const res = await getInventory();
             console.log("Logistic Data:", res);
             if (res.success) {
-                setLogistic(res.data);
+                // Sort data by date in descending order (newest first)
+                const sortedData = res.data.sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+                setLogistic(sortedData);
+                setFilteredLogistic(sortedData);
             }
         };
         fetchData();
     }, []);
+
+    // Search functionality
+    useEffect(() => {
+        if (searchTerm === "") {
+            setFilteredLogistic(logistic);
+            setCurrentPage(1);
+        } else {
+            const filtered = logistic.filter(item => 
+                item.product?.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+            setFilteredLogistic(filtered);
+            setCurrentPage(1);
+        }
+    }, [searchTerm, logistic]);
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    };
 
     function openDeleteModal(inventory) {
         setSelectedInventory(inventory);
@@ -41,12 +64,15 @@ export default function page(params) {
     }
 
     function handleDeleteSuccess() {
-        setLogistic(prev => prev.filter(item => item.id !== selectedInventory.id));
+        const updatedLogistic = logistic.filter(item => item.id !== selectedInventory.id);
+        setLogistic(updatedLogistic);
+        // Update filtered data as well
+        setFilteredLogistic(prev => prev.filter(item => item.id !== selectedInventory.id));
         closeModal();
     }
 
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedItems = logistic.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedItems = filteredLogistic.slice(startIndex, startIndex + itemsPerPage);
     return (
         <div className="flex flex-col justify-start ml-[72px] py-8 pr-8 gap-4">
             <H1 className={`text-4xl mb-4`}>Logistic History</H1>
@@ -54,7 +80,9 @@ export default function page(params) {
                 <div className="relative w-[520px]">
                     <input
                         type="text"
-                        placeholder="Search"
+                        placeholder="Search product name..."
+                        value={searchTerm}
+                        onChange={handleSearchChange}
                         className="w-full p-4 pr-12 rounded-full border-none focus:outline-sky-950 placeholder:text-sky-950 bg-white"
                     />
                     <FaMagnifyingGlass
@@ -111,7 +139,7 @@ export default function page(params) {
             <Pagination
                 currentPage={currentPage}
                 onPageChange={setCurrentPage}
-                totalItems={logistic.length}
+                totalItems={filteredLogistic.length}
                 itemsPerPage={itemsPerPage}
             />
 

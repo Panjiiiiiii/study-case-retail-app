@@ -97,7 +97,7 @@ export default function FormLogistic() {
                 name="productName"
                 options={products}
                 value={selectedProduct}
-                onChange={(e) => setSelectedProduct(e.target.value)}
+                onChange={(value) => setSelectedProduct(value)}
               />
             </div>
             <div className="flex flex-col gap-4">
