@@ -2,6 +2,7 @@
 
 import { Button } from "@/components/ui/Button";
 import { H1 } from "@/components/ui/Text";
+import { EnumInput } from "@/components/ui/Input";
 import { useEffect, useState } from "react";
 import { FaEye, FaMagnifyingGlass, FaPlus, FaTrash } from "react-icons/fa6";
 import Pagination from "./components/pagination";
@@ -10,17 +11,30 @@ import { getAllTransactions, deleteTransaction } from "@/app/action/transaction"
 import TransactionsDetails from "./components/transactions";
 import { Modal } from "../components/Modal";
 import DeleteTransaction from "./components/deleteTransaction";
+import { DateInput } from "./components/dateInput";
 import toast from "react-hot-toast";
 
 export default function page(params) {
     const [currentPage, setCurrentPage] = useState(1);
     const [transaction, setTransaction] = useState([]);
+    const [filteredTransactions, setFilteredTransactions] = useState([]);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [transactionToDelete, setTransactionToDelete] = useState(null);
+    // Filter states
+    const [dateFilter, setDateFilter] = useState("");
+    const [paymentMethodFilter, setPaymentMethodFilter] = useState("");
     const router = useRouter();
     const itemsPerPage = 10;
+
+    // Payment method options for enum input
+    const paymentMethodOptions = [
+        { value: "", label: "All Payment Methods" },
+        { value: "CASH", label: "Cash" },
+        { value: "TRANSFER", label: "Transfer" },
+        { value: "QRIS", label: "QRIS" }
+    ];
 
     useEffect(() => {
         const fetchData = async () => {
@@ -28,10 +42,48 @@ export default function page(params) {
             console.log("Transaction Data:", res);
             if (res.success) {
                 setTransaction(res.data);
+                setFilteredTransactions(res.data);
             }
         };
         fetchData();
     }, []);
+
+    // Filter transactions based on date and payment method
+    useEffect(() => {
+        let filtered = [...transaction];
+
+        // Sort by date (newest first)
+        filtered.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+        // Filter by date
+        if (dateFilter) {
+            filtered = filtered.filter(item => {
+                const transactionDate = new Date(item.createdAt).toISOString().split('T')[0];
+                return transactionDate === dateFilter;
+            });
+        }
+
+        // Filter by payment method
+        if (paymentMethodFilter) {
+            filtered = filtered.filter(item => item.paymentMethod === paymentMethodFilter);
+        }
+
+        setFilteredTransactions(filtered);
+        setCurrentPage(1); // Reset to first page when filtering
+    }, [transaction, dateFilter, paymentMethodFilter]);
+
+    const handleDateFilterChange = (e) => {
+        setDateFilter(e.target.value);
+    };
+
+    const handlePaymentMethodFilterChange = (value) => {
+        setPaymentMethodFilter(value);
+    };
+
+    const clearFilters = () => {
+        setDateFilter("");
+        setPaymentMethodFilter("");
+    };
 
     function openTransactionModal(transactionItem) {
         setSelectedTransaction(transactionItem);
@@ -62,7 +114,7 @@ export default function page(params) {
     };
 
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedItems = transaction.slice(startIndex, startIndex + itemsPerPage);
+    const paginatedItems = filteredTransactions.slice(startIndex, startIndex + itemsPerPage);
     // Skeleton loading state
     const [isLoading, setIsLoading] = useState(true);
 
@@ -72,6 +124,7 @@ export default function page(params) {
             const res = await getAllTransactions();
             if (res.success) {
                 setTransaction(res.data);
+                setFilteredTransactions(res.data);
             }
             setIsLoading(false);
         };
@@ -81,6 +134,39 @@ export default function page(params) {
     return (
         <div className="flex flex-col justify-start ml-[72px] py-8 pr-8 gap-4">
             <H1 className={`text-4xl mb-4`}>Transaction History</H1>
+            
+            {/* Filter Section */}
+            <div className="rounded-lg mb-4">
+                <div className="flex flex-wrap gap-4 items-end">
+                    <DateInput
+                        label="Filter by Date"
+                        name="dateFilter"
+                        value={dateFilter}
+                        onChange={handleDateFilterChange}
+                        className="min-w-[200px]"
+                    />
+                    <EnumInput
+                        label="Payment Method"
+                        name="paymentMethodFilter"
+                        value={paymentMethodFilter}
+                        onChange={handlePaymentMethodFilterChange}
+                        options={paymentMethodOptions}
+                        className="min-w-[200px]"
+                        placeholder="All Payment Methods"
+                    />
+                    <Button
+                        onClick={clearFilters}
+                        className="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-3xl"
+                    >
+                        Clear Filters
+                    </Button>
+                </div>
+                {(dateFilter || paymentMethodFilter) && (
+                    <div className="mt-2 text-sm text-gray-600">
+                        Showing {filteredTransactions.length} of {transaction.length} transactions
+                    </div>
+                )}
+            </div>
             <table>
                 <thead>
                     <tr className="bg-sky-950">
@@ -148,7 +234,7 @@ export default function page(params) {
             <Pagination
                 currentPage={currentPage}
                 onPageChange={setCurrentPage}
-                totalItems={transaction.length}
+                totalItems={filteredTransactions.length}
                 itemsPerPage={itemsPerPage}
             />
 
