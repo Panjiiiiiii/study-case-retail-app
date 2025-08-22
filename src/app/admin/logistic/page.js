@@ -10,6 +10,62 @@ import { getInventory } from "@/app/action/inventory";
 import { Modal } from "../components/Modal";
 import DeleteInventory from "./delete/[id]/deleteInventory";
 
+// Skeleton Component
+const Skeleton = ({ className = "" }) => (
+  <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} />
+);
+
+const LogisticPageSkeleton = () => (
+  <div className="flex flex-col justify-start ml-[72px] py-8 pr-8 gap-4">
+    <H1 className={`text-4xl mb-4`}>Logistic History</H1>
+    <div className="flex flex-row items-center justify-between mb-5 gap-4">
+      <div className="relative w-[520px]">
+        <input
+          type="text"
+          placeholder="Search product name..."
+          disabled
+          className="w-full p-4 pr-12 rounded-full border-none focus:outline-sky-950 placeholder:text-sky-950 bg-gray-100 opacity-50"
+        />
+        <FaMagnifyingGlass
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 text-sky-950 opacity-50"
+          size={20}
+        />
+      </div>
+      <Button variant="success" className={`rounded-4xl p-4 opacity-50`} disabled>
+        <div className="flex flex-row items-center gap-3">
+          <FaPlus size={16} />
+          <span className="font-medium text-[16px]">Add Item</span>
+        </div>
+      </Button>
+    </div>
+    <table className="w-full">
+      <thead>
+        <tr className="bg-sky-950">
+          <th className="p-2 text-white text-[16px]">Date</th>
+          <th className="p-2 text-white text-[16px]">Product Name</th>
+          <th className="p-2 text-white text-[16px]">Quantity</th>
+          <th className="p-2 text-white text-[16px]">Price Action</th>
+          <th className="p-2 text-white text-[16px]">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        {Array.from({ length: 10 }).map((_, rowIndex) => (
+          <tr key={rowIndex} className="bg-white text-center">
+            {Array.from({ length: 5 }).map((_, colIndex) => (
+              <td key={colIndex} className="p-2">
+                <Skeleton className="h-4 w-full" />
+              </td>
+            ))}
+          </tr>
+        ))}
+      </tbody>
+    </table>
+    <div className="flex justify-center">
+      <Skeleton className="h-8 w-64" />
+    </div>
+  </div>
+);
+
 
 export default function page(params) {
     const [currentPage, setCurrentPage] = useState(1);
@@ -18,18 +74,26 @@ export default function page(params) {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedInventory, setSelectedInventory] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
     const router = useRouter();
     const itemsPerPage = 10;
 
     useEffect(() => {
         const fetchData = async () => {
-            const res = await getInventory();
-            console.log("Logistic Data:", res);
-            if (res.success) {
-                // Sort data by date in descending order (newest first)
-                const sortedData = res.data.sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
-                setLogistic(sortedData);
-                setFilteredLogistic(sortedData);
+            setIsLoading(true);
+            try {
+                const res = await getInventory();
+                console.log("Logistic Data:", res);
+                if (res.success) {
+                    // Sort data by date in descending order (newest first)
+                    const sortedData = res.data.sort((a, b) => new Date(b.date || b.createdAt) - new Date(a.date || a.createdAt));
+                    setLogistic(sortedData);
+                    setFilteredLogistic(sortedData);
+                }
+            } catch (error) {
+                console.error("Error fetching logistic data:", error);
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchData();
@@ -73,6 +137,11 @@ export default function page(params) {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedItems = filteredLogistic.slice(startIndex, startIndex + itemsPerPage);
+    
+    if (isLoading) {
+        return <LogisticPageSkeleton />;
+    }
+    
     return (
         <div className="flex flex-col justify-start ml-[72px] py-8 pr-8 gap-4">
             <H1 className={`text-4xl mb-4`}>Logistic History</H1>
