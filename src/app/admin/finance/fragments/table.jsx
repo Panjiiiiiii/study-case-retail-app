@@ -13,9 +13,39 @@ import DeleteTransaction from "../components/deleteTransaction";
 import toast from "react-hot-toast";
 import { Modal } from "../../components/Modal";
 
+// Skeleton Component
+const Skeleton = ({ className = "" }) => (
+  <div className={`animate-pulse rounded-md bg-gray-200 ${className}`} />
+);
+
+const TableSkeleton = () => (
+  <table className="w-full">
+    <thead>
+      <tr className="bg-sky-950">
+        <th className="p-2 text-white text-[16px] text-center">Date</th>
+        <th className="p-2 text-white text-[16px] text-center">Total Price</th>
+        <th className="p-2 text-white text-[16px] text-center">Payment Method</th>
+        <th className="p-2 text-white text-[16px] text-center">Action</th>
+      </tr>
+    </thead>
+    <tbody>
+      {Array.from({ length: 3 }).map((_, rowIndex) => (
+        <tr key={rowIndex} className="bg-white text-center">
+          {Array.from({ length: 4 }).map((_, colIndex) => (
+            <td key={colIndex} className="p-2">
+              <Skeleton className="h-4 w-full" />
+            </td>
+          ))}
+        </tr>
+      ))}
+    </tbody>
+  </table>
+);
+
 export default function TableTransaction(params) {
     const [currentPage, setCurrentPage] = useState(1);
     const [transaction, setTransaction] = useState([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [selectedTransaction, setSelectedTransaction] = useState(null);
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -25,10 +55,19 @@ export default function TableTransaction(params) {
 
     useEffect(() => {
         const fetchData = async () => {
-            const res = await getAllTransactions();
-            console.log("Transaction Data:", res);
-            if (res.success) {
-                setTransaction(res.data);
+            setIsLoading(true);
+            try {
+                const res = await getAllTransactions();
+                console.log("Transaction Data:", res);
+                if (res.success) {
+                    // Sort transactions by date (newest first)
+                    const sortedTransactions = res.data.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+                    setTransaction(sortedTransactions);
+                }
+            } catch (error) {
+                console.error("Error fetching transactions:", error);
+            } finally {
+                setIsLoading(false);
             }
         };
         fetchData();
@@ -64,6 +103,17 @@ export default function TableTransaction(params) {
 
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedItems = transaction.slice(startIndex, startIndex + itemsPerPage);
+    
+    if (isLoading) {
+        return (
+            <>
+                <TableSkeleton />
+                <div className="flex justify-center mt-4">
+                    <Skeleton className="h-8 w-64" />
+                </div>
+            </>
+        );
+    }
     
     return (
         <>
