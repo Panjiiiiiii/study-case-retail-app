@@ -38,7 +38,6 @@ export async function POST(request) {
         name: true,
         email: true,
         role: true,
-        createdAt: true
       }
     });
 

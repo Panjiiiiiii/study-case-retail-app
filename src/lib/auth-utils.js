@@ -1,11 +1,12 @@
-import { auth } from './auth';
+import { getServerSession } from 'next-auth/next';
+import { authOptions } from './auth';
 
 /**
  * Get current user session (server-side)
  * @returns {Promise<Object|null>} User session or null
  */
 export async function getCurrentUser() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   return session?.user || null;
 }
 
@@ -14,7 +15,7 @@ export async function getCurrentUser() {
  * @returns {Promise<boolean>} True if authenticated
  */
 export async function isAuthenticated() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   return !!session;
 }
 
@@ -24,7 +25,7 @@ export async function isAuthenticated() {
  * @returns {Promise<boolean>} True if user has role
  */
 export async function hasRole(role) {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   return session?.user?.role === role;
 }
 
@@ -50,7 +51,7 @@ export async function isCashier() {
  * @throws {Error} If not authenticated
  */
 export async function requireAuth() {
-  const session = await auth();
+  const session = await getServerSession(authOptions);
   if (!session) {
     throw new Error('Authentication required');
   }

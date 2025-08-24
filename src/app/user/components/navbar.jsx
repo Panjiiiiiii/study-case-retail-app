@@ -20,12 +20,21 @@ export default function NavbarSidebar({ onToggleCart }) {
 
   const handleLogout = async () => {
     try {
-      await signOut({ redirect: false });
+      console.log('🔍 Starting logout process...');
       toast.success("Logout berhasil!");
-      router.push("/auth/signin");
+      
+      // Use NextAuth signOut with redirect to home page
+      await signOut({ 
+        callbackUrl: '/',
+        redirect: true
+      });
+      
     } catch (error) {
-      console.error('Logout error:', error);
+      console.error('❌ Logout error:', error);
       toast.error("Terjadi kesalahan saat logout");
+      
+      // Fallback: force redirect to home
+      window.location.href = '/';
     }
   };
 

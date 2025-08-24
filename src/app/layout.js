@@ -1,6 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "react-hot-toast";
+import { AuthProvider } from "@/components/AuthProvider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -18,8 +19,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${inter.variable} antialiased font-sans`}
       >
-        <Toaster position="top-center"/>
-        {children}
+        <AuthProvider>
+          <Toaster position="top-center"/>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

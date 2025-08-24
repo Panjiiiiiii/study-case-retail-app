@@ -1,17 +1,10 @@
 import NextAuth from 'next-auth';
-import GoogleProvider from 'next-auth/providers/google';
 import CredentialsProvider from 'next-auth/providers/credentials';
-import { PrismaAdapter } from '@auth/prisma-adapter';
 import { prisma } from './prisma';
 import bcrypt from 'bcryptjs';
 
 export const authOptions = {
-  adapter: PrismaAdapter(prisma),
   providers: [
-    GoogleProvider({
-      clientId: process.env.GOOGLE_CLIENT_ID,
-      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-    }),
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -19,35 +12,46 @@ export const authOptions = {
         password: { label: 'Password', type: 'password' }
       },
       async authorize(credentials) {
+        console.log('🔍 NextAuth authorize called with:', { 
+          email: credentials?.email,
+          hasPassword: !!credentials?.password 
+        });
+
         if (!credentials?.email || !credentials?.password) {
+          console.log('❌ Missing credentials');
           return null;
         }
 
         try {
           const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email
-            }
+            where: { email: credentials.email }
           });
 
-          if (!user || !user.password) {
+          console.log('🔍 User lookup result:', user ? 'Found' : 'Not found');
+
+          if (!user) {
+            console.log('❌ User not found for email:', credentials.email);
             return null;
           }
 
           const isPasswordValid = await bcrypt.compare(credentials.password, user.password);
+          console.log('🔍 Password validation:', isPasswordValid ? 'Valid' : 'Invalid');
 
           if (!isPasswordValid) {
+            console.log('❌ Invalid password for user:', credentials.email);
             return null;
           }
 
+          console.log('✅ Authentication successful for:', user.email);
+          
           return {
-            id: user.id.toString(),
+            id: user.id,
             email: user.email,
             name: user.name,
-            role: user.role,
+            role: user.role
           };
         } catch (error) {
-          console.error('Auth error:', error);
+          console.error('❌ Auth error:', error);
           return null;
         }
       }
@@ -55,60 +59,36 @@ export const authOptions = {
   ],
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user, account }) {
+    async jwt({ token, user }) {
       if (user) {
+        console.log('🔍 JWT callback - Adding user to token:', user.email);
         token.role = user.role;
         token.id = user.id;
       }
-      
-      if (account?.provider === 'google') {
-        // Handle Google OAuth user creation/update
-        const existingUser = await prisma.user.findUnique({
-          where: { email: token.email }
-        });
-
-        if (!existingUser) {
-          // Create new user from Google OAuth
-          const newUser = await prisma.user.create({
-            data: {
-              email: token.email,
-              name: token.name,
-              role: 'CASHIER', // Default role for OAuth users
-              password: '', // Empty password for OAuth users
-            }
-          });
-          token.role = newUser.role;
-          token.id = newUser.id.toString();
-        } else {
-          token.role = existingUser.role;
-          token.id = existingUser.id.toString();
-        }
-      }
-
       return token;
     },
     async session({ session, token }) {
       if (token) {
+        console.log('🔍 Session callback - Adding token data to session');
         session.user.id = token.id;
         session.user.role = token.role;
       }
       return session;
-    },
-    async signIn({ user, account, profile }) {
-      if (account?.provider === 'google') {
-        // Allow Google OAuth sign in
-        return true;
-      }
-      return true;
     }
   },
   pages: {
     signIn: '/auth/signin',
-    error: '/auth/error',
+    signOut: '/',
+    error: '/auth/signin'
+  },
+  events: {
+    async signOut(message) {
+      console.log('🔍 SignOut event triggered:', message);
+    }
   },
   secret: process.env.NEXTAUTH_SECRET,
+  debug: true
 };
-
-export default NextAuth(authOptions); 

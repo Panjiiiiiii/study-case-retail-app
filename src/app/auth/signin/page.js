@@ -4,10 +4,55 @@ import { Button } from "@/components/ui/Button";
 import { PasswordInput, TextInput } from "@/components/ui/Input";
 import { H1, P } from "@/components/ui/Text";
 import { IoLogoGoogle } from "react-icons/io";
-
-// import { signIn } from "next-auth/react";
+import { useState } from "react";
+import { signIn, getSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
 export default function SignInPage() {
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!email || !password) {
+      toast.error("Email dan password harus diisi");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const result = await signIn('credentials', {
+        email,
+        password,
+        redirect: false
+      });
+
+      if (result?.error) {
+        toast.error("Email atau password salah");
+      } else {
+        toast.success("Login berhasil!");
+        
+        // Get session to determine redirect based on role
+        const session = await getSession();
+        if (session?.user?.role === 'ADMIN') {
+          router.push('/admin');
+        } else {
+          router.push('/user');
+        }
+      }
+    } catch (error) {
+      console.error('Login error:', error);
+      toast.error("Terjadi kesalahan saat login");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#E5E7EB] px-4">
       <div className="flex flex-row gap-4 overflow-hidden">
@@ -25,21 +70,39 @@ export default function SignInPage() {
           <H1 className="text-start text-sky-950">Welcome User</H1>
           <P className="text-start mb-4 font-light text-sky-950">Login here</P>
 
-          <div className="flex flex-col gap-4 mb-4">
-            <TextInput placeholder="Email" />
-            <PasswordInput placeholder="Password" />
-          </div>
-
-          <div className="flex justify-center mb-4">
-            <Button
-              children="Login"
-              className="rounded-3xl w-[90px] font-semibold border border-transparent hover:bg-white hover:text-sky-950 hover:border-sky-950 transition"
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-4">
+            <TextInput 
+              placeholder="Email" 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              type="email"
+              disabled={isLoading}
             />
-          </div>
+            <PasswordInput 
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+            <div className="flex justify-center mt-4">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="rounded-3xl w-[90px] font-semibold border border-transparent hover:bg-white hover:text-sky-950 hover:border-sky-950 transition disabled:opacity-50"
+              >
+                {isLoading ? "Loading..." : "Login"}
+              </Button>
+            </div>
+          </form>
 
           <P className={`text-center text-[12px]`}>
             Forgot password?{" "}
             <a href="/auth/new-password" className="font-semibold cursor-pointer hover:underline">Click Here</a>
+          </P>
+          
+          <P className={`text-center text-[12px] mt-2`}>
+            Don't have an account?{" "}
+            <a href="/auth/signup" className="font-semibold cursor-pointer hover:underline">Sign Up</a>
           </P>
 
           <div className="flex items-center my-4">

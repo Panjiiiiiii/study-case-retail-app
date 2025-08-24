@@ -4,10 +4,61 @@ import { Button } from "@/components/ui/Button";
 import { PasswordInput, TextInput } from "@/components/ui/Input";
 import { H1, P } from "@/components/ui/Text";
 import { IoLogoGoogle } from "react-icons/io";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import toast from "react-hot-toast";
 
-// import { signIn } from "next-auth/react";
+export default function SignUpPage() {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
-export default function SignInPage() {
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!name || !email || !password) {
+      toast.error("Semua field harus diisi");
+      return;
+    }
+
+    if (password.length < 6) {
+      toast.error("Password minimal 6 karakter");
+      return;
+    }
+
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('/api/auth/register', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          name,
+          email,
+          password
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        toast.success("Registrasi berhasil! Silakan login.");
+        router.push('/auth/signin');
+      } else {
+        toast.error(data.message || "Registrasi gagal");
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast.error("Terjadi kesalahan saat registrasi");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   return (
     <div className="flex items-center justify-center min-h-screen bg-[#E5E7EB] px-4">
       <div className="flex flex-row gap-4 overflow-hidden">
@@ -25,18 +76,41 @@ export default function SignInPage() {
           <H1 className="text-start text-sky-950">Welcome New User</H1>
           <P className="text-start mb-4 font-light text-sky-950">Register here</P>
 
-          <div className="flex flex-col gap-4 mb-4">
-            <TextInput placeholder="Username" />
-            <TextInput placeholder="Email" />
-            <PasswordInput placeholder="Password" />
-          </div>
-
-          <div className="flex justify-center mb-4">
-            <Button
-              children="Register"
-              className="rounded-3xl w-[90px] font-semibold border border-transparent hover:bg-white hover:text-sky-950 hover:border-sky-950 transition"
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4 mb-4">
+            <TextInput 
+              placeholder="Username" 
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isLoading}
             />
-          </div>
+            <TextInput 
+              placeholder="Email" 
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+            />
+            <PasswordInput 
+              placeholder="Password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+            />
+            <div className="flex justify-center mt-4">
+              <Button
+                type="submit"
+                disabled={isLoading}
+                className="rounded-3xl w-[90px] font-semibold border border-transparent hover:bg-white hover:text-sky-950 hover:border-sky-950 transition disabled:opacity-50"
+              >
+                {isLoading ? "Loading..." : "Register"}
+              </Button>
+            </div>
+          </form>
+
+          <P className={`text-center text-[12px] mb-4`}>
+            Already have an account?{" "}
+            <a href="/auth/signin" className="font-semibold cursor-pointer hover:underline">Sign In</a>
+          </P>
 
           <div className="flex items-center my-4">
             <hr className="flex-grow border-t border-gray-300" />
