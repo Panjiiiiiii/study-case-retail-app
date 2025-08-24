@@ -3,12 +3,12 @@ import { getToken } from 'next-auth/jwt';
 
 export async function middleware(req) {
   console.log('🔍 Middleware called for:', req.nextUrl.pathname);
-  
-  const token = await getToken({ 
-    req, 
-    secret: process.env.NEXTAUTH_SECRET 
+
+  const token = await getToken({
+    req,
+    secret: process.env.NEXTAUTH_SECRET
   });
-  
+
   const isAuth = !!token;
   const isAuthPage = req.nextUrl.pathname.startsWith('/auth');
   const isAdminPage = req.nextUrl.pathname.startsWith('/admin');
@@ -30,9 +30,9 @@ export async function middleware(req) {
   }
 
   // Skip static files
-  if (req.nextUrl.pathname.startsWith('/_next') || 
-      req.nextUrl.pathname.includes('.') ||
-      req.nextUrl.pathname === '/favicon.ico') {
+  if (req.nextUrl.pathname.startsWith('/_next') ||
+    req.nextUrl.pathname.includes('.') ||
+    req.nextUrl.pathname === '/favicon.ico') {
     return NextResponse.next();
   }
 
@@ -49,18 +49,27 @@ export async function middleware(req) {
   // If user is not authenticated and trying to access protected pages
   if (!isAuth && (isAdminPage || isUserPage)) {
     console.log('🔍 Redirecting unauthenticated user to signin');
-    return NextResponse.redirect(new URL('/auth/signin', req.url));
+    const url = new URL('/auth/signin', req.url);
+    url.searchParams.set('error', 'unauthorized');
+    url.searchParams.set('message', 'Anda harus login terlebih dahulu untuk mengakses halaman ini');
+    return NextResponse.redirect(url);
   }
 
   // If user is authenticated but trying to access wrong role pages
   if (isAuth) {
     if (isAdminPage && token.role !== 'ADMIN') {
       console.log('🔍 Redirecting non-admin from admin pages');
-      return NextResponse.redirect(new URL('/user', req.url));
+      const url = new URL('/auth/signin', req.url);
+      url.searchParams.set('error', 'forbidden');
+      url.searchParams.set('message', 'Anda tidak memiliki akses ke halaman admin');
+      return NextResponse.redirect(url);
     }
     if (isUserPage && token.role !== 'CASHIER') {
       console.log('🔍 Redirecting non-cashier from user pages');
-      return NextResponse.redirect(new URL('/admin', req.url));
+      const url = new URL('/auth/signin', req.url);
+      url.searchParams.set('error', 'forbidden');
+      url.searchParams.set('message', 'Anda tidak memiliki akses ke halaman cashier');
+      return NextResponse.redirect(url);
     }
   }
 
@@ -77,7 +86,10 @@ export async function middleware(req) {
   // If unauthenticated user tries to access home, redirect to signin
   if (isHomePage && !isAuth) {
     console.log('🔍 Redirecting unauthenticated user from home to signin');
-    return NextResponse.redirect(new URL('/auth/signin', req.url));
+    const url = new URL('/auth/signin', req.url);
+    url.searchParams.set('error', 'session_required');
+    url.searchParams.set('message', 'Silakan login untuk melanjutkan');
+    return NextResponse.redirect(url);
   }
 
   console.log('🔍 Allowing access to:', req.nextUrl.pathname);

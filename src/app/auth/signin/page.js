@@ -4,7 +4,7 @@ import { Button } from "@/components/ui/Button";
 import { PasswordInput, TextInput } from "@/components/ui/Input";
 import { H1, P } from "@/components/ui/Text";
 import { IoLogoGoogle } from "react-icons/io";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { signIn, getSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import toast from "react-hot-toast";
@@ -14,6 +14,37 @@ export default function SignInPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  // Handle error from middleware redirect
+  useEffect(() => {
+    // Check for error parameters in URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const error = urlParams.get('error');
+    const message = urlParams.get('message');
+    
+    if (error && message) {
+      // Show toast based on error type
+      switch (error) {
+        case 'unauthorized':
+          toast.error(message);
+          break;
+        case 'forbidden':
+          toast.error(message);
+          break;
+        case 'session_required':
+          toast.error(message);
+          break;
+        default:
+          toast.error('Akses ditolak');
+      }
+      
+      // Clear the URL parameters after showing the toast
+      const url = new URL(window.location);
+      url.searchParams.delete('error');
+      url.searchParams.delete('message');
+      window.history.replaceState({}, '', url);
+    }
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
