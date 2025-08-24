@@ -6,6 +6,7 @@ import { H1, P } from "@/components/ui/Text";
 import { IoLogoGoogle } from "react-icons/io";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { signIn } from "next-auth/react";
 import toast from "react-hot-toast";
 
 export default function SignUpPage() {
@@ -14,6 +15,21 @@ export default function SignUpPage() {
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+
+  const handleGoogleSignUp = async () => {
+    try {
+      setIsLoading(true);
+      await signIn('google', {
+        callbackUrl: '/user',
+        redirect: true
+      });
+    } catch (error) {
+      console.error('Google sign up error:', error);
+      toast.error("Terjadi kesalahan saat daftar dengan Google");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -118,9 +134,13 @@ export default function SignUpPage() {
             <hr className="flex-grow border-t border-gray-300" />
           </div>
 
-          <Button className={`flex items-center justify-center gap-2 border border-sky-950 text-sky-950 bg-transparent rounded-3xl py-2 text-sm hover:bg-sky-950 hover:text-white transition`}>
+          <Button 
+            onClick={handleGoogleSignUp}
+            disabled={isLoading}
+            className={`flex items-center justify-center gap-2 border border-sky-950 text-sky-950 bg-transparent rounded-3xl py-2 text-sm hover:bg-sky-950 hover:text-white transition disabled:opacity-50`}
+          >
             <span className="text-lg font-bold"><IoLogoGoogle /></span>
-            Sign up with Google
+            {isLoading ? "Loading..." : "Sign up with Google"}
           </Button>
 
           <P className="text-[12px] text-center mt-4 text-sky-950">

@@ -1,20 +1,24 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { getServerSession } from 'next-auth';
+import { authOptions } from '@/lib/auth';
 
 export async function createTransaction(formData) {
     try {
-        // Comment session check for now since middleware has error
-        // const { auth } = await import('@/lib/auth');
-        // const session = await auth();
+        // Get session to get user ID
+        const session = await getServerSession(authOptions);
 
-        // if (!session) {
-        //   return { success: false, message: 'Unauthorized', error: 'Unauthorized' };
-        // }
+        if (!session || !session.user) {
+            return { success: false, message: 'Unauthorized - Please login first', error: 'Unauthorized' };
+        }
 
+        const userId = session.user.id;
         const total = parseFloat(formData.get('total'));
         const paymentMethod = formData.get('paymentMethod');
         const items = JSON.parse(formData.get('items')); // Array of {productId, quantity}
+
+        console.log('🔍 Creating transaction for user:', { userId, userEmail: session.user.email });
 
         // Validate required fields
         if (!total || !paymentMethod || !items || items.length === 0) {
@@ -26,9 +30,6 @@ export async function createTransaction(formData) {
         if (!validPaymentMethods.includes(paymentMethod)) {
             return { success: false, message: 'Metode pembayaran tidak valid' };
         }
-
-        // Use dummy user ID for now since session is not available
-        const userId = '6b65293e-85fc-4e6d-a462-d533cb537e21'; // TODO: Replace with actual user ID when auth is fixed
 
         // Validate and check stock for each item
         for (const item of items) {
@@ -231,6 +232,47 @@ export async function deleteTransaction(id) {
     } catch (error) {
         console.error('Error deleting transaction:', error);
         return { success: false, message: 'Terjadi kesalahan saat menghapus transaksi', error: error.message };
+    }
+}
+
+export async function getUserTransactions() {
+    try {
+        // Get session to get user ID
+        const session = await getServerSession(authOptions);
+
+        if (!session || !session.user) {
+            return { success: false, message: 'Unauthorized - Please login first', error: 'Unauthorized' };
+        }
+
+        const userId = session.user.id;
+        
+        const transactions = await prisma.transaction.findMany({
+            where: {
+                userId: userId
+            },
+            include: {
+                items: {
+                    include: {
+                        product: {
+                            select: {
+                                id: true,
+                                name: true,
+                                price: true
+                            }
+                        }
+                    }
+                }
+            },
+            orderBy: {
+                createdAt: 'desc'
+            }
+        });
+
+        return { success: true, data: transactions, message: 'Data transaksi berhasil diambil' };
+
+    } catch (error) {
+        console.error('Error fetching user transactions:', error);
+        return { success: false, message: 'Terjadi kesalahan saat mengambil data transaksi user', error: error.message };
     }
 }
 

@@ -1,10 +1,15 @@
 import NextAuth from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
 import { prisma } from './prisma';
 import bcrypt from 'bcryptjs';
 
 export const authOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -62,11 +67,51 @@ export const authOptions = {
     maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
-    async jwt({ token, user }) {
+    async signIn({ user, account, profile }) {
+      if (account?.provider === 'google') {
+        try {
+          // Check if user already exists
+          const existingUser = await prisma.user.findUnique({
+            where: { email: user.email }
+          });
+
+          if (!existingUser) {
+            // Create new user with Google data
+            await prisma.user.create({
+              data: {
+                name: user.name || profile?.name || 'Google User',
+                email: user.email,
+                password: '', // Empty password for Google users
+                role: 'CASHIER' // Default role
+              }
+            });
+          }
+          return true;
+        } catch (error) {
+          console.error('Error creating Google user:', error);
+          return false;
+        }
+      }
+      return true;
+    },
+    async jwt({ token, user, account }) {
       if (user) {
         console.log('🔍 JWT callback - Adding user to token:', user.email);
-        token.role = user.role;
-        token.id = user.id;
+        
+        // For Google users, get user data from database
+        if (account?.provider === 'google') {
+          const dbUser = await prisma.user.findUnique({
+            where: { email: user.email }
+          });
+          if (dbUser) {
+            token.role = dbUser.role;
+            token.id = dbUser.id;
+          }
+        } else {
+          // For credential users
+          token.role = user.role;
+          token.id = user.id;
+        }
       }
       return token;
     },

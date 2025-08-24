@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { FaEye, FaMagnifyingGlass, FaPlus, FaTrash } from "react-icons/fa6";
 import Pagination from "./components/pagination";
 import { useRouter } from "next/navigation";
-import { getAllTransactions, deleteTransaction } from "@/app/action/transaction";
+import { getAllTransactions, deleteTransaction, getUserTransactions } from "@/app/action/transaction";
 import TransactionsDetails from "./components/transactions";
 import { Modal } from "../components/Modal";
 import DeleteTransaction from "./components/deleteTransaction";
@@ -38,11 +38,14 @@ export default function page(params) {
 
     useEffect(() => {
         const fetchData = async () => {
-            const res = await getAllTransactions();
-            console.log("Transaction Data:", res);
+            const res = await getUserTransactions(); // Use getUserTransactions instead of getAllTransactions for user pages
+            console.log("User Transaction Data:", res);
             if (res.success) {
                 setTransaction(res.data);
                 setFilteredTransactions(res.data);
+            } else {
+                console.error("Failed to fetch transactions:", res.message);
+                toast.error(res.message || "Failed to load transactions");
             }
         };
         fetchData();
