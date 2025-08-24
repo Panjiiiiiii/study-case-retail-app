@@ -68,7 +68,7 @@ export default function MenuCard({ product }) {
                         alt="Menu Image" 
                         className="w-[120px] h-[120px] object-cover rounded-t-xl mb-4"
                     />
-                    <H2 className="text-[18px] font-bold text-sky-950 mb-1">
+                    <H2 className="text-[18px] text-center font-bold text-sky-950 mb-1">
                         {product?.name || "Kecap Bango 180 ML"}
                     </H2>
                     <P className="text-[12px] font-medium text-gray-400 mb-1">
