@@ -5,7 +5,8 @@ A modern, full-stack ERP (Enterprise Resource Planning) system designed specific
 ## 🚀 Features
 
 - **👥 Multi-Role Authentication**: Admin and Cashier roles with secure authentication
-- **📦 Inventory Management**: Complete product catalog with categories and stock tracking
+- **� Google OAuth Integration**: Sign in/up with Google account support
+- **�📦 Inventory Management**: Complete product catalog with categories and stock tracking
 - **💰 Transaction Management**: POS system with payment processing
 - **📊 Analytics Dashboard**: Real-time sales charts and business insights
 - **📱 Responsive Design**: Works perfectly on desktop, tablet, and mobile
@@ -18,7 +19,7 @@ A modern, full-stack ERP (Enterprise Resource Planning) system designed specific
 - **Frontend**: Next.js 15, React 19, TailwindCSS
 - **Backend**: Next.js API Routes, NextAuth.js
 - **Database**: PostgreSQL with Prisma ORM
-- **Authentication**: NextAuth.js with JWT
+- **Authentication**: NextAuth.js with JWT + Google OAuth Provider
 - **File Storage**: Cloudinary
 - **UI Components**: Custom components with Tailwind
 - **Charts**: Recharts
@@ -59,11 +60,37 @@ DATABASE_URL="postgresql://username:password@localhost:5432/erp_retail_db"
 NEXTAUTH_SECRET="your-nextauth-secret-key"
 NEXTAUTH_URL="http://localhost:3000"
 
+# Google OAuth (Required for Google Sign-in)
+GOOGLE_CLIENT_ID="your-google-client-id"
+GOOGLE_CLIENT_SECRET="your-google-client-secret"
+
+# Admin User Setup
+ADMIN_NAME="Admin User"
+ADMIN_EMAIL="admin@example.com"
+ADMIN_PASSWORD="admin123"
+
 # Cloudinary (Optional - for image uploads)
 CLOUDINARY_CLOUD_NAME="your-cloud-name"
 CLOUDINARY_API_KEY="your-api-key"
 CLOUDINARY_API_SECRET="your-api-secret"
 ```
+
+### 3.1. Google OAuth Setup
+To enable Google authentication, you need to:
+
+1. **Create Google OAuth Credentials**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/)
+   - Create a new project or select existing one
+   - Enable Google+ API
+   - Go to "Credentials" → "Create Credentials" → "OAuth 2.0 Client IDs"
+   - Set application type to "Web application"
+   - Add authorized redirect URIs:
+     - `http://localhost:3000/api/auth/callback/google` (development)
+     - `https://yourdomain.com/api/auth/callback/google` (production)
+
+2. **Configure Environment Variables**:
+   - Copy the Client ID to `GOOGLE_CLIENT_ID`
+   - Copy the Client Secret to `GOOGLE_CLIENT_SECRET`
 
 ### 4. Database Setup
 ```bash
@@ -115,6 +142,10 @@ erp-retail-app/
 
 ## 🔐 User Roles & Access
 
+### Authentication Methods
+- **Email/Password**: Traditional registration and login
+- **Google OAuth**: Sign in/up with Google account (automatically creates account with CASHIER role)
+
 ### Admin Role
 - Full system access
 - Inventory management (add/edit/delete products)
@@ -129,6 +160,7 @@ erp-retail-app/
 - Inventory viewing (read-only)
 - Sales history
 - Customer interaction
+- Available for both manual registration and Google OAuth users
 
 ## 🚀 Deployment
 
@@ -143,6 +175,9 @@ Make sure to set all environment variables in your production environment:
 - `DATABASE_URL` - Your production database URL
 - `NEXTAUTH_SECRET` - A secure secret for NextAuth
 - `NEXTAUTH_URL` - Your production domain
+- `GOOGLE_CLIENT_ID` - Google OAuth Client ID
+- `GOOGLE_CLIENT_SECRET` - Google OAuth Client Secret
+- `ADMIN_NAME`, `ADMIN_EMAIL`, `ADMIN_PASSWORD` - Admin user credentials
 - Cloudinary credentials (if using image uploads)
 
 ### Recommended Deployment Platforms
