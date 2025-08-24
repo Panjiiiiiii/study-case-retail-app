@@ -168,29 +168,6 @@ The application uses the following main entities:
 4. Push to the branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-## 📝 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
-
-## 🆘 Support
-
-If you encounter any issues or have questions:
-1. Check the existing [Issues](https://github.com/yourusername/erp-retail-app/issues)
-2. Create a new issue with detailed information
-3. Contact the maintainers
-
-## 🔮 Roadmap
-
-- [ ] Multi-store support
-- [ ] Advanced reporting features
-- [ ] Mobile app integration
-- [ ] Barcode scanning
-- [ ] Email notifications
-- [ ] API documentation
-- [ ] Docker containerization
-
----
-
 **Happy coding! 🎉**
 
-For more information, visit our [documentation](https://github.com/yourusername/erp-retail-app/wiki) or contact us.
+For more information, visit our [documentation](https://github.com/Panjiiiiiii/study-case-retail-app) or contact us.
