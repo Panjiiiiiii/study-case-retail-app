@@ -10,12 +10,13 @@ datasource db {
 }
 
 model User {
-  id            String        @id @default(uuid())
-  name          String
-  email         String        @unique
-  password      String?       // Made optional for Google users
-  role          Role          @default(CASHIER)
-  transactions  Transaction[]
+  id           String        @id @default(uuid())
+  name         String
+  email        String        @unique
+  password     String? // Made optional for Google users
+  role         Role          @default(CASHIER)
+  provider     String        @default("credentials") // "credentials" | "google"
+  transactions Transaction[]
 }
 
 model Transaction {
@@ -54,16 +55,16 @@ model Product {
 model Inventory {
   id             String   @id @default(uuid())
   productId      String
-  Product        Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
+  Product        Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
   wholeSalePrice Float
   quantity       Int
   createdAt      DateTime @default(now())
 }
 
 model Category {
-  id        String    @id @default(uuid())
-  name      String
-  products  Product[] // 1 category can be used by many products
+  id       String    @id @default(uuid())
+  name     String
+  products Product[] // 1 category can be used by many products
 }
 
 enum PaymentMethod {

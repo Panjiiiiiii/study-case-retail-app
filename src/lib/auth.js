@@ -82,7 +82,8 @@ export const authOptions = {
                 name: user.name || profile?.name || 'Google User',
                 email: user.email,
                 password: '', // Empty password for Google users
-                role: 'CASHIER' // Default role
+                role: 'CASHIER' ,
+                provider : 'google',// Default role
               }
             });
           }
