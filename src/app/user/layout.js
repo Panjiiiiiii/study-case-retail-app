@@ -5,11 +5,13 @@ import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import NavbarSidebar from "./components/navbar";
 import CartList from "./fragments/cart";
+import Logout from "@/components/ui/molecule/Logout";
 
 export default function Layout({ children }) {
   const { data: session, status } = useSession();
   const router = useRouter();
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const [showLogout, setShowLogout] = useState(false);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -52,7 +54,10 @@ export default function Layout({ children }) {
 
   return (
     <>
-      <NavbarSidebar onToggleCart={() => setIsCartOpen(!isCartOpen)} />
+      <NavbarSidebar 
+        onToggleCart={() => setIsCartOpen(!isCartOpen)}
+        onLogout={() => setShowLogout(true)}
+      />
 
       <main className="flex-1 bg-[#EBE7E5] ml-[100px] min-h-screen relative">
         {children}
@@ -64,6 +69,7 @@ export default function Layout({ children }) {
           </div>
         )}
       </main>
+      <Logout open={showLogout} setOpen={setShowLogout} />
     </>
   );
 }

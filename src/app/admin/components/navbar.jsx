@@ -6,9 +6,7 @@ import { BsCurrencyDollar } from "react-icons/bs";
 import { LuArrowDownUp } from "react-icons/lu";
 import { IoLogOut } from "react-icons/io5";
 import Link from "next/link";
-import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
-import toast from "react-hot-toast";
+import { useSession } from "next-auth/react";
 
 const navItems = [
   { icon: <AiFillHome className="text-[28px]" />, label: 'Home', href: '/admin/' },
@@ -17,29 +15,8 @@ const navItems = [
   { icon: <BsCurrencyDollar className="text-[28px]" />, label: 'Finance', href: '/admin/finance' },
 ];
 
-export default function NavbarSidebar() {
+export default function NavbarSidebar({ onLogout }) {
   const { data: session } = useSession();
-  const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      console.log('🔍 Starting logout process...');
-      toast.success("Logout berhasil!");
-      
-      // Use NextAuth signOut with redirect to home page
-      await signOut({ 
-        callbackUrl: '/',
-        redirect: true
-      });
-      
-    } catch (error) {
-      console.error('❌ Logout error:', error);
-      toast.error("Terjadi kesalahan saat logout");
-      
-      // Fallback: force redirect to home
-      window.location.href = '/';
-    }
-  };
 
   return (
     <aside className="fixed top-0 left-0 h-screen w-[100px] bg-white flex flex-col items-center justify-between py-4 shadow-md">
@@ -72,7 +49,7 @@ export default function NavbarSidebar() {
 
       {/* Logout (Bottom Icon) */}
       <button 
-        onClick={handleLogout}
+        onClick={onLogout}
         title="Logout"
         className="group mb-8 p-4 rounded-md hover:bg-sky-950 transition-colors flex flex-col items-center gap-1"
       >

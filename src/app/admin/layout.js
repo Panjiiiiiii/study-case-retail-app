@@ -2,12 +2,14 @@
 
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import NavbarSidebar from "./components/navbar";
+import Logout from "@/components/ui/molecule/Logout";
 
 export default function Layout({ children }) {
   const { data: session, status } = useSession();
   const router = useRouter();
+  const [showLogout, setShowLogout] = useState(false);
 
   useEffect(() => {
     if (status === "loading") return;
@@ -50,10 +52,11 @@ export default function Layout({ children }) {
 
   return (
     <>
-      <NavbarSidebar />
+      <NavbarSidebar onLogout={() => setShowLogout(true)} />
       <main className="flex-1 bg-gray-200 ml-[100px] min-h-screen relative">
         {children}
       </main>
+      <Logout open={showLogout} setOpen={setShowLogout} />
     </>
   );
 }

@@ -81,14 +81,14 @@ export const authOptions = {
   },
   pages: {
     signIn: '/auth/signin',
-    signOut: '/',
-    error: '/auth/signin'
+    signOut: '/auth/signin',
+    error: '/auth/signin',
   },
-  events: {
-    async signOut(message) {
-      console.log('🔍 SignOut event triggered:', message);
-    }
-  },
+  // events: {
+  //   async signOut(message) {
+  //     console.log('🔍 SignOut event triggered:', message);
+  //   }
+  // },
   secret: process.env.NEXTAUTH_SECRET,
   debug: true
 };
