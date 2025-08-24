@@ -5,8 +5,8 @@ A modern, full-stack ERP (Enterprise Resource Planning) system designed specific
 ## 🚀 Features
 
 - **👥 Multi-Role Authentication**: Admin and Cashier roles with secure authentication
-- **� Google OAuth Integration**: Sign in/up with Google account support
-- **�📦 Inventory Management**: Complete product catalog with categories and stock tracking
+- **🔒 Google OAuth Integration**: Sign in/up with Google account support
+- **📦 Inventory Management**: Complete product catalog with categories and stock tracking
 - **💰 Transaction Management**: POS system with payment processing
 - **📊 Analytics Dashboard**: Real-time sales charts and business insights
 - **📱 Responsive Design**: Works perfectly on desktop, tablet, and mobile
