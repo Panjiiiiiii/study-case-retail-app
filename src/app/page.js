@@ -78,6 +78,24 @@ export default function Home() {
             <p className="text-gray-600 text-sm">Sistem role Admin dan Cashier dengan akses berbeda</p>
           </div>
         </div>
+
+        {/* Footer */}
+        <footer className="mt-16 pt-8 border-t border-gray-200">
+          <div className="text-center text-gray-500 text-sm">
+            <p>© {new Date().getFullYear()} ERP Retail App. All rights reserved.</p>
+            <p className="mt-1">
+              Built with ❤️ by{" "}
+              <a 
+                href="https://github.com/Panjiiiiiii" 
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="text-sky-950 hover:underline font-medium"
+              >
+                Panji
+              </a>
+            </p>
+          </div>
+        </footer>
       </div>
     </div>
   );
